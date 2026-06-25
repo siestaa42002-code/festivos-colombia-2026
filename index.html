@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <meta name="description" content="Calendario interactivo de festivos oficiales de Colombia 2026, con próximo festivo en cuenta regresiva y filtros por tipo." />
+  <meta name="description" content="Calendario interactivo de festivos oficiales de Colombia 2026, con vista de calendario, próximo festivo en cuenta regresiva, filtros y exportación a iCal." />
   <title>Festivos Colombia 2026</title>
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
@@ -39,6 +39,12 @@
         todos los festivos oficiales del año, los que cayeron en lunes por la
         Ley Emiliani y los que se quedan en su fecha original.
       </p>
+      <div class="hero-actions">
+        <button id="btnDescargar" class="btn-primary" type="button">
+          Descargar para Google Calendar
+        </button>
+        <span class="hero-actions-meta" id="festivosRestantes"></span>
+      </div>
     </section>
 
     <section class="next-holiday container" aria-labelledby="proximoTitulo">
@@ -75,14 +81,28 @@
       </div>
     </section>
 
-    <section class="filters container" aria-label="Filtros de festivos">
-      <button class="filter-btn active" data-filter="todos">Todos</button>
-      <button class="filter-btn" data-filter="emiliani">Ley Emiliani</button>
-      <button class="filter-btn" data-filter="fija">Fecha fija</button>
-      <button class="filter-btn" data-filter="proximos">Próximos</button>
+    <section class="view-toggle container" aria-label="Cambiar vista">
+      <div class="toggle-group" role="tablist">
+        <button class="toggle-btn active" data-view="calendar" role="tab" aria-selected="true">
+          Calendario
+        </button>
+        <button class="toggle-btn" data-view="list" role="tab" aria-selected="false">
+          Lista
+        </button>
+      </div>
     </section>
 
-    <section class="calendar container" aria-label="Listado de festivos">
+    <section id="vistaCalendario" class="calendar-view container" aria-label="Vista de calendario">
+      <div id="gridMeses" class="grid-meses"></div>
+    </section>
+
+    <section id="vistaLista" class="calendar container hidden" aria-label="Listado de festivos">
+      <div class="filters">
+        <button class="filter-btn active" data-filter="todos">Todos</button>
+        <button class="filter-btn" data-filter="emiliani">Ley Emiliani</button>
+        <button class="filter-btn" data-filter="fija">Fecha fija</button>
+        <button class="filter-btn" data-filter="proximos">Próximos</button>
+      </div>
       <div id="listaFestivos" class="lista-festivos"></div>
     </section>
 
@@ -113,6 +133,15 @@
       </div>
     </section>
   </main>
+
+  <!-- Popover para mostrar info al hacer hover/tap -->
+  <div id="popover" class="popover" role="dialog" aria-hidden="true">
+    <button class="popover-close" type="button" aria-label="Cerrar">×</button>
+    <span id="popoverTag" class="tag"></span>
+    <h3 id="popoverNombre"></h3>
+    <p id="popoverFecha"></p>
+    <p id="popoverExtra" class="popover-extra"></p>
+  </div>
 
   <footer class="site-footer">
     <div class="container footer-inner">
