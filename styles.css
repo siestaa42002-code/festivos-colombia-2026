@@ -1,0 +1,472 @@
+:root {
+  /* Paleta */
+  --bg: #0E2A22;
+  --surface: #143A2F;
+  --surface-soft: #1A4A3C;
+  --cream: #EDE6D3;
+  --cream-soft: rgba(237, 230, 211, 0.7);
+  --cream-dim: rgba(237, 230, 211, 0.45);
+  --gold: #E8B83B;
+  --coral: #E55A4E;
+  --border: rgba(237, 230, 211, 0.12);
+
+  /* Tipografía */
+  --font-display: "Fraunces", Georgia, serif;
+  --font-body: "Inter", -apple-system, BlinkMacSystemFont, sans-serif;
+  --font-mono: "JetBrains Mono", monospace;
+
+  /* Espaciado */
+  --container-max: 1080px;
+  --space-xs: 0.5rem;
+  --space-sm: 1rem;
+  --space-md: 1.75rem;
+  --space-lg: 3rem;
+  --space-xl: 5rem;
+}
+
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+html {
+  scroll-behavior: smooth;
+}
+
+body {
+  font-family: var(--font-body);
+  background: var(--bg);
+  color: var(--cream);
+  line-height: 1.5;
+  min-height: 100vh;
+  -webkit-font-smoothing: antialiased;
+  background-image:
+    radial-gradient(ellipse 80% 50% at 50% -10%, rgba(232, 184, 59, 0.08), transparent),
+    radial-gradient(ellipse 60% 50% at 100% 100%, rgba(229, 90, 78, 0.06), transparent);
+  background-attachment: fixed;
+}
+
+.container {
+  width: 100%;
+  max-width: var(--container-max);
+  margin-inline: auto;
+  padding-inline: 1.5rem;
+}
+
+/* Header */
+.site-header {
+  padding-block: 1.5rem;
+  border-bottom: 1px solid var(--border);
+}
+
+.header-inner {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 1rem;
+}
+
+.eyebrow {
+  font-family: var(--font-mono);
+  font-size: 0.75rem;
+  letter-spacing: 0.15em;
+  text-transform: uppercase;
+  color: var(--gold);
+}
+
+.meta-nav {
+  display: flex;
+  gap: 0.75rem;
+  font-family: var(--font-mono);
+  font-size: 0.85rem;
+  color: var(--cream-soft);
+}
+
+/* Hero */
+.hero {
+  padding-block: var(--space-xl) var(--space-lg);
+}
+
+.hero-title {
+  font-family: var(--font-display);
+  font-weight: 600;
+  font-size: clamp(3rem, 11vw, 7rem);
+  line-height: 0.95;
+  letter-spacing: -0.03em;
+  font-variation-settings: "opsz" 144;
+}
+
+.hero-title-accent {
+  display: block;
+  font-style: italic;
+  font-weight: 400;
+  color: var(--gold);
+}
+
+.hero-year {
+  display: block;
+  font-family: var(--font-mono);
+  font-size: clamp(1.5rem, 4vw, 2.5rem);
+  font-weight: 500;
+  color: var(--cream-soft);
+  letter-spacing: 0;
+  margin-top: 1rem;
+}
+
+.hero-lead {
+  margin-top: 2rem;
+  max-width: 36rem;
+  font-size: 1.125rem;
+  color: var(--cream-soft);
+}
+
+/* Próximo festivo */
+.next-holiday {
+  padding-block: var(--space-md);
+}
+
+.next-card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 1.25rem;
+  padding: 2rem;
+  position: relative;
+  overflow: hidden;
+}
+
+.next-card::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  right: 0;
+  width: 200px;
+  height: 200px;
+  background: radial-gradient(circle, rgba(232, 184, 59, 0.15), transparent 70%);
+  pointer-events: none;
+}
+
+.next-card-meta {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  flex-wrap: wrap;
+}
+
+.tag {
+  display: inline-block;
+  font-family: var(--font-mono);
+  font-size: 0.7rem;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  padding: 0.35rem 0.7rem;
+  border-radius: 999px;
+}
+
+.tag-light {
+  background: var(--gold);
+  color: var(--bg);
+  font-weight: 500;
+}
+
+.tag-emiliani {
+  background: rgba(232, 184, 59, 0.15);
+  color: var(--gold);
+  border: 1px solid rgba(232, 184, 59, 0.3);
+}
+
+.tag-fija {
+  background: rgba(229, 90, 78, 0.15);
+  color: var(--coral);
+  border: 1px solid rgba(229, 90, 78, 0.3);
+}
+
+.next-weekday {
+  font-family: var(--font-mono);
+  font-size: 0.85rem;
+  color: var(--cream-soft);
+  text-transform: capitalize;
+}
+
+.next-name {
+  font-family: var(--font-display);
+  font-size: clamp(1.75rem, 5vw, 3rem);
+  font-weight: 600;
+  line-height: 1.05;
+  margin-top: 1rem;
+  letter-spacing: -0.02em;
+}
+
+.next-date-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-end;
+  gap: 2rem;
+  margin-top: 2rem;
+  flex-wrap: wrap;
+}
+
+.next-date {
+  display: flex;
+  align-items: baseline;
+  gap: 0.5rem;
+}
+
+.next-day {
+  font-family: var(--font-display);
+  font-size: clamp(3rem, 8vw, 5rem);
+  font-weight: 800;
+  line-height: 1;
+  color: var(--gold);
+}
+
+.next-month {
+  font-family: var(--font-mono);
+  font-size: 1rem;
+  text-transform: uppercase;
+  letter-spacing: 0.15em;
+  color: var(--cream-soft);
+}
+
+.countdown {
+  display: flex;
+  gap: 1.25rem;
+}
+
+.countdown-item {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  min-width: 3rem;
+}
+
+.countdown-value {
+  font-family: var(--font-mono);
+  font-size: 1.5rem;
+  font-weight: 500;
+  color: var(--cream);
+  font-variant-numeric: tabular-nums;
+}
+
+.countdown-label {
+  font-family: var(--font-mono);
+  font-size: 0.7rem;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--cream-dim);
+  margin-top: 0.25rem;
+}
+
+/* Filtros */
+.filters {
+  padding-block: var(--space-md) var(--space-sm);
+  display: flex;
+  gap: 0.5rem;
+  flex-wrap: wrap;
+}
+
+.filter-btn {
+  background: transparent;
+  color: var(--cream-soft);
+  border: 1px solid var(--border);
+  padding: 0.5rem 1rem;
+  border-radius: 999px;
+  font-family: var(--font-body);
+  font-size: 0.875rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.filter-btn:hover {
+  color: var(--cream);
+  border-color: var(--cream-soft);
+}
+
+.filter-btn.active {
+  background: var(--cream);
+  color: var(--bg);
+  border-color: var(--cream);
+}
+
+.filter-btn:focus-visible {
+  outline: 2px solid var(--gold);
+  outline-offset: 2px;
+}
+
+/* Lista de festivos */
+.calendar {
+  padding-block: var(--space-md) var(--space-xl);
+}
+
+.lista-festivos {
+  display: grid;
+  gap: 0.75rem;
+}
+
+.festivo-item {
+  display: grid;
+  grid-template-columns: 80px 1fr auto;
+  gap: 1.5rem;
+  align-items: center;
+  padding: 1.25rem 1.5rem;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 0.75rem;
+  transition: all 0.25s ease;
+}
+
+.festivo-item:hover {
+  background: var(--surface-soft);
+  border-color: rgba(232, 184, 59, 0.3);
+  transform: translateX(4px);
+}
+
+.festivo-item.pasado {
+  opacity: 0.45;
+}
+
+.festivo-item.proximo {
+  border-color: rgba(232, 184, 59, 0.4);
+  background: linear-gradient(
+    to right,
+    rgba(232, 184, 59, 0.08),
+    var(--surface)
+  );
+}
+
+.festivo-fecha {
+  font-family: var(--font-display);
+  font-weight: 800;
+  text-align: center;
+}
+
+.festivo-dia {
+  display: block;
+  font-size: 2.25rem;
+  line-height: 1;
+  color: var(--gold);
+}
+
+.festivo-mes {
+  display: block;
+  font-family: var(--font-mono);
+  font-weight: 400;
+  font-size: 0.7rem;
+  letter-spacing: 0.15em;
+  text-transform: uppercase;
+  color: var(--cream-soft);
+  margin-top: 0.35rem;
+}
+
+.festivo-info h3 {
+  font-family: var(--font-display);
+  font-size: 1.25rem;
+  font-weight: 600;
+  line-height: 1.2;
+  letter-spacing: -0.01em;
+}
+
+.festivo-info p {
+  font-family: var(--font-mono);
+  font-size: 0.8rem;
+  color: var(--cream-soft);
+  text-transform: capitalize;
+  margin-top: 0.25rem;
+}
+
+.festivo-tag-container {
+  display: flex;
+  align-items: center;
+}
+
+/* Info cards */
+.info {
+  padding-block: var(--space-lg) var(--space-xl);
+  border-top: 1px solid var(--border);
+}
+
+.info-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+  gap: 1.5rem;
+}
+
+.info-card {
+  padding: 1.5rem;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 0.75rem;
+}
+
+.info-card h3 {
+  font-family: var(--font-display);
+  font-size: 1.25rem;
+  font-weight: 600;
+  margin-bottom: 0.75rem;
+  color: var(--gold);
+}
+
+.info-card p {
+  font-size: 0.95rem;
+  color: var(--cream-soft);
+  line-height: 1.6;
+}
+
+/* Footer */
+.site-footer {
+  padding-block: 2rem;
+  border-top: 1px solid var(--border);
+}
+
+.footer-inner {
+  display: flex;
+  justify-content: center;
+  gap: 0.75rem;
+  flex-wrap: wrap;
+  font-family: var(--font-mono);
+  font-size: 0.8rem;
+  color: var(--cream-dim);
+}
+
+/* Responsive */
+@media (max-width: 640px) {
+  .next-date-row {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 1.5rem;
+  }
+
+  .countdown {
+    gap: 0.75rem;
+  }
+
+  .countdown-item {
+    min-width: 2.5rem;
+  }
+
+  .festivo-item {
+    grid-template-columns: 60px 1fr;
+    gap: 1rem;
+    padding: 1rem;
+  }
+
+  .festivo-tag-container {
+    grid-column: 1 / -1;
+    justify-content: flex-end;
+  }
+
+  .festivo-dia {
+    font-size: 1.75rem;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    transition-duration: 0.01ms !important;
+  }
+}

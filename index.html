@@ -1,0 +1,129 @@
+<!DOCTYPE html>
+<html lang="es-CO">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="description" content="Calendario interactivo de festivos oficiales de Colombia 2026, con próximo festivo en cuenta regresiva y filtros por tipo." />
+  <title>Festivos Colombia 2026</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link
+    href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,600;9..144,800&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap"
+    rel="stylesheet"
+  />
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+  <header class="site-header">
+    <div class="container header-inner">
+      <span class="eyebrow">Calendario oficial</span>
+      <nav class="meta-nav" aria-label="Información del año">
+        <span>2026</span>
+        <span aria-hidden="true">·</span>
+        <span>Colombia</span>
+        <span aria-hidden="true">·</span>
+        <span id="totalFestivos">19 festivos</span>
+      </nav>
+    </div>
+  </header>
+
+  <main>
+    <section class="hero container">
+      <h1 class="hero-title">
+        Festivos
+        <span class="hero-title-accent">Colombia</span>
+        <span class="hero-year">2026</span>
+      </h1>
+      <p class="hero-lead">
+        Diecinueve días para descansar, viajar o quedarse en casa. Aquí están
+        todos los festivos oficiales del año, los que cayeron en lunes por la
+        Ley Emiliani y los que se quedan en su fecha original.
+      </p>
+    </section>
+
+    <section class="next-holiday container" aria-labelledby="proximoTitulo">
+      <div class="next-card">
+        <div class="next-card-meta">
+          <span class="tag tag-light">Próximo festivo</span>
+          <span id="nextWeekday" class="next-weekday"></span>
+        </div>
+        <h2 id="proximoTitulo" class="next-name"></h2>
+        <div class="next-date-row">
+          <div class="next-date">
+            <span id="nextDay" class="next-day"></span>
+            <span id="nextMonth" class="next-month"></span>
+          </div>
+          <div class="countdown" aria-label="Tiempo restante">
+            <div class="countdown-item">
+              <span id="cdDays" class="countdown-value">0</span>
+              <span class="countdown-label">días</span>
+            </div>
+            <div class="countdown-item">
+              <span id="cdHours" class="countdown-value">0</span>
+              <span class="countdown-label">horas</span>
+            </div>
+            <div class="countdown-item">
+              <span id="cdMinutes" class="countdown-value">0</span>
+              <span class="countdown-label">min</span>
+            </div>
+            <div class="countdown-item">
+              <span id="cdSeconds" class="countdown-value">0</span>
+              <span class="countdown-label">seg</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section class="filters container" aria-label="Filtros de festivos">
+      <button class="filter-btn active" data-filter="todos">Todos</button>
+      <button class="filter-btn" data-filter="emiliani">Ley Emiliani</button>
+      <button class="filter-btn" data-filter="fija">Fecha fija</button>
+      <button class="filter-btn" data-filter="proximos">Próximos</button>
+    </section>
+
+    <section class="calendar container" aria-label="Listado de festivos">
+      <div id="listaFestivos" class="lista-festivos"></div>
+    </section>
+
+    <section class="info container">
+      <div class="info-grid">
+        <article class="info-card">
+          <h3>Ley Emiliani</h3>
+          <p>
+            La Ley 51 de 1983 traslada al lunes siguiente algunos festivos
+            cuando no caen en lunes. Así se forman los famosos puentes.
+          </p>
+        </article>
+        <article class="info-card">
+          <h3>Fechas fijas</h3>
+          <p>
+            Hay festivos que siempre se celebran en su fecha original sin
+            importar el día de la semana: Año Nuevo, Día del Trabajo,
+            Independencia, Batalla de Boyacá, Inmaculada Concepción y Navidad.
+          </p>
+        </article>
+        <article class="info-card">
+          <h3>Nuevo en 2026</h3>
+          <p>
+            El Día Nacional de Nuestra Señora del Rosario de Chiquinquirá entra
+            como festivo oficial. En 2026 se traslada al lunes 13 de julio.
+          </p>
+        </article>
+      </div>
+    </section>
+  </main>
+
+  <footer class="site-footer">
+    <div class="container footer-inner">
+      <span>Hecho en Medellín</span>
+      <span aria-hidden="true">·</span>
+      <span>Datos oficiales</span>
+      <span aria-hidden="true">·</span>
+      <span id="anioActual"></span>
+    </div>
+  </footer>
+
+  <script src="script.js"></script>
+</body>
+</html>
