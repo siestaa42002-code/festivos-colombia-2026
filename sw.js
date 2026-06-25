@@ -1,5 +1,5 @@
 // Service worker básico con estrategia cache-first
-const CACHE_NAME = "festivos-v1";
+const CACHE_NAME = "festivos-v3";
 const ARCHIVOS_CACHE = [
   "/",
   "/index.html",

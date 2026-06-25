@@ -687,29 +687,105 @@ function inicializarTema() {
 // ===========================================================================
 
 function inicializarSelectores() {
-  // Llenar años (2024 a 2030)
-  const selectorAnio = document.getElementById("selectorAnio");
+  // Poblar años (2024 a 2030)
+  const menuAnio = document.querySelector("#dropdownAnio .dropdown-menu");
+  menuAnio.innerHTML = "";
   for (let a = 2024; a <= 2030; a++) {
-    const opt = document.createElement("option");
-    opt.value = a;
-    opt.textContent = a;
-    if (a === estado.anio) opt.selected = true;
-    selectorAnio.appendChild(opt);
+    const li = document.createElement("li");
+    li.setAttribute("role", "option");
+    li.dataset.value = a;
+    li.textContent = a;
+    if (a === estado.anio) li.classList.add("selected");
+    menuAnio.appendChild(li);
   }
 
-  // Seleccionar país guardado
-  document.getElementById("selectorPais").value = estado.pais;
+  // Marcar el país inicial
+  const liPaisActivo = document.querySelector(`#dropdownPais li[data-value="${estado.pais}"]`);
+  if (liPaisActivo) liPaisActivo.classList.add("selected");
 
-  document.getElementById("selectorPais").addEventListener("change", (e) => {
-    estado.pais = e.target.value;
+  // Setear valores visibles iniciales
+  document.querySelector("#dropdownPais .dropdown-value").textContent = PAISES[estado.pais].nombre;
+  document.querySelector("#dropdownAnio .dropdown-value").textContent = estado.anio;
+
+  configurarDropdown("dropdownPais", (valor) => {
+    estado.pais = valor;
     localStorage.setItem(STORAGE_KEYS.pais, estado.pais);
+    document.querySelector("#dropdownPais .dropdown-value").textContent = PAISES[estado.pais].nombre;
     refrescarTodo();
   });
 
-  document.getElementById("selectorAnio").addEventListener("change", (e) => {
-    estado.anio = parseInt(e.target.value, 10);
+  configurarDropdown("dropdownAnio", (valor) => {
+    estado.anio = parseInt(valor, 10);
     localStorage.setItem(STORAGE_KEYS.anio, estado.anio);
+    document.querySelector("#dropdownAnio .dropdown-value").textContent = estado.anio;
     refrescarTodo();
+  });
+}
+
+function configurarDropdown(id, onChange) {
+  const dropdown = document.getElementById(id);
+  const toggle = dropdown.querySelector(".dropdown-toggle");
+  const menu = dropdown.querySelector(".dropdown-menu");
+
+  toggle.addEventListener("click", (e) => {
+    e.stopPropagation();
+    const estaAbierto = dropdown.classList.contains("open");
+    // Cerrar otros dropdowns abiertos
+    document.querySelectorAll(".dropdown.open").forEach((d) => {
+      if (d !== dropdown) {
+        d.classList.remove("open");
+        d.querySelector(".dropdown-toggle").setAttribute("aria-expanded", "false");
+      }
+    });
+    dropdown.classList.toggle("open", !estaAbierto);
+    toggle.setAttribute("aria-expanded", !estaAbierto);
+  });
+
+  menu.addEventListener("click", (e) => {
+    const li = e.target.closest("li[data-value]");
+    if (!li) return;
+    const valor = li.dataset.value;
+    // Marcar como seleccionado
+    menu.querySelectorAll("li").forEach((item) => item.classList.remove("selected"));
+    li.classList.add("selected");
+    // Cerrar
+    dropdown.classList.remove("open");
+    toggle.setAttribute("aria-expanded", "false");
+    // Callback
+    onChange(valor);
+  });
+
+  // Soporte teclado
+  toggle.addEventListener("keydown", (e) => {
+    if (e.key === "Enter" || e.key === " " || e.key === "ArrowDown") {
+      e.preventDefault();
+      toggle.click();
+      const primerItem = menu.querySelector("li");
+      if (primerItem) primerItem.focus();
+    }
+  });
+
+  menu.querySelectorAll("li").forEach((li, i, lista) => {
+    li.tabIndex = 0;
+    li.addEventListener("keydown", (e) => {
+      if (e.key === "ArrowDown") {
+        e.preventDefault();
+        const sig = lista[i + 1] || lista[0];
+        sig.focus();
+      } else if (e.key === "ArrowUp") {
+        e.preventDefault();
+        const ant = lista[i - 1] || lista[lista.length - 1];
+        ant.focus();
+      } else if (e.key === "Enter" || e.key === " ") {
+        e.preventDefault();
+        li.click();
+        toggle.focus();
+      } else if (e.key === "Escape") {
+        dropdown.classList.remove("open");
+        toggle.setAttribute("aria-expanded", "false");
+        toggle.focus();
+      }
+    });
   });
 }
 
@@ -1112,11 +1188,17 @@ function init() {
     if (celda) compartirFestivo(celda.dataset.iso);
   });
 
-  // Cerrar popover al hacer clic fuera
+  // Cerrar popover y dropdowns al hacer clic fuera
   document.addEventListener("click", (e) => {
     const popover = document.getElementById("popover");
     if (!popover.contains(e.target) && !e.target.closest(".celda-festivo") && !e.target.closest(".festivo-item")) {
       ocultarPopover();
+    }
+    if (!e.target.closest(".dropdown")) {
+      document.querySelectorAll(".dropdown.open").forEach((d) => {
+        d.classList.remove("open");
+        d.querySelector(".dropdown-toggle").setAttribute("aria-expanded", "false");
+      });
     }
   });
 

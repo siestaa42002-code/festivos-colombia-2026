@@ -40,16 +40,30 @@
       </div>
       <div class="header-controls">
         <div class="selector-group">
-          <label for="selectorPais" class="visually-hidden">País</label>
-          <select id="selectorPais" class="selector">
-            <option value="co" selected>Colombia</option>
-            <option value="ec">Ecuador</option>
-            <option value="pe">Perú</option>
-            <option value="mx">México</option>
-            <option value="es">España</option>
-          </select>
-          <label for="selectorAnio" class="visually-hidden">Año</label>
-          <select id="selectorAnio" class="selector"></select>
+          <div class="dropdown" id="dropdownPais">
+            <button type="button" class="dropdown-toggle" aria-haspopup="listbox" aria-expanded="false">
+              <span class="dropdown-value">Colombia</span>
+              <svg class="dropdown-chevron" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                <polyline points="6 9 12 15 18 9"></polyline>
+              </svg>
+            </button>
+            <ul class="dropdown-menu" role="listbox" aria-label="Seleccionar país">
+              <li role="option" data-value="co">Colombia</li>
+              <li role="option" data-value="ec">Ecuador</li>
+              <li role="option" data-value="pe">Perú</li>
+              <li role="option" data-value="mx">México</li>
+              <li role="option" data-value="es">España</li>
+            </ul>
+          </div>
+          <div class="dropdown" id="dropdownAnio">
+            <button type="button" class="dropdown-toggle" aria-haspopup="listbox" aria-expanded="false">
+              <span class="dropdown-value">2026</span>
+              <svg class="dropdown-chevron" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                <polyline points="6 9 12 15 18 9"></polyline>
+              </svg>
+            </button>
+            <ul class="dropdown-menu" role="listbox" aria-label="Seleccionar año"></ul>
+          </div>
         </div>
         <button id="btnTema" class="icon-btn" type="button" aria-label="Cambiar tema">
           <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
