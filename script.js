@@ -38,18 +38,21 @@ const DIAS_SEMANA = [
   "jueves", "viernes", "sábado"
 ];
 
-// Parsear fecha en zona horaria local (evita el desfase de UTC)
 function parseFecha(iso) {
   const [year, month, day] = iso.split("-").map(Number);
-  return new Date(year, month - 1, day);
+  // Anclar a medianoche en Colombia (UTC-5) para que el contador
+  // sea consistente sin importar la zona horaria del navegador.
+  return new Date(Date.UTC(year, month - 1, day, 5, 0, 0));
 }
 
 function formatearDia(fecha) {
-  return DIAS_SEMANA[fecha.getDay()];
+  // Usar UTC porque ya guardamos la fecha como las 05:00 UTC (medianoche en Colombia)
+  return DIAS_SEMANA[fecha.getUTCDay()];
 }
 
 function formatearMes(fecha, corto = false) {
-  return corto ? MESES_CORTOS[fecha.getMonth()] : MESES[fecha.getMonth()];
+  const mes = fecha.getUTCMonth();
+  return corto ? MESES_CORTOS[mes] : MESES[mes];
 }
 
 // Estado
@@ -75,7 +78,7 @@ function renderProximoFestivo() {
   const fecha = parseFecha(proximo.fecha);
   document.getElementById("proximoTitulo").textContent = proximo.nombre;
   document.getElementById("nextWeekday").textContent = formatearDia(fecha);
-  document.getElementById("nextDay").textContent = fecha.getDate();
+  document.getElementById("nextDay").textContent = fecha.getUTCDate();
   document.getElementById("nextMonth").textContent = formatearMes(fecha);
 
   actualizarContador(fecha);
@@ -141,7 +144,7 @@ function renderLista() {
       return `
         <article class="festivo-item${claseExtra}">
           <div class="festivo-fecha">
-            <span class="festivo-dia">${fecha.getDate()}</span>
+            <span class="festivo-dia">${fecha.getUTCDate()}</span>
             <span class="festivo-mes">${formatearMes(fecha, true)}</span>
           </div>
           <div class="festivo-info">
