@@ -1,10 +1,27 @@
 <!DOCTYPE html>
-<html lang="es-CO">
+<html lang="es-CO" data-theme="oscuro">
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <meta name="description" content="Calendario interactivo de festivos oficiales de Colombia 2026, con vista de calendario, próximo festivo en cuenta regresiva, filtros y exportación a iCal." />
+  <meta name="description" content="Calendario interactivo de festivos oficiales de Colombia con vista mensual, cálculo de puentes, sugerencias de vacaciones óptimas, días hábiles, comparativo con otros países, descarga ICS y modo offline." />
+  <meta name="theme-color" content="#0E2A22" />
+
+  <meta property="og:type" content="website" />
+  <meta property="og:title" content="Festivos Colombia" />
+  <meta property="og:description" content="Calendario interactivo con festivos oficiales, puentes, vacaciones óptimas y comparativo entre países." />
+  <meta property="og:image" content="/og-image.svg" />
+  <meta property="og:locale" content="es_CO" />
+
+  <meta name="twitter:card" content="summary_large_image" />
+  <meta name="twitter:title" content="Festivos Colombia" />
+  <meta name="twitter:description" content="Calendario interactivo con festivos, puentes y sugerencias de vacaciones." />
+  <meta name="twitter:image" content="/og-image.svg" />
+
+  <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+  <link rel="manifest" href="/manifest.json" />
+
   <title>Festivos Colombia 2026</title>
+
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link
@@ -14,16 +31,32 @@
   <link rel="stylesheet" href="styles.css" />
 </head>
 <body>
+  <canvas id="confetti" class="confetti-canvas" aria-hidden="true"></canvas>
+
   <header class="site-header">
     <div class="container header-inner">
-      <span class="eyebrow">Calendario oficial</span>
-      <nav class="meta-nav" aria-label="Información del año">
-        <span>2026</span>
-        <span aria-hidden="true">·</span>
-        <span>Colombia</span>
-        <span aria-hidden="true">·</span>
-        <span id="totalFestivos">19 festivos</span>
-      </nav>
+      <div class="header-left">
+        <span class="eyebrow">Calendario oficial</span>
+      </div>
+      <div class="header-controls">
+        <div class="selector-group">
+          <label for="selectorPais" class="visually-hidden">País</label>
+          <select id="selectorPais" class="selector">
+            <option value="co" selected>Colombia</option>
+            <option value="ec">Ecuador</option>
+            <option value="pe">Perú</option>
+            <option value="mx">México</option>
+            <option value="es">España</option>
+          </select>
+          <label for="selectorAnio" class="visually-hidden">Año</label>
+          <select id="selectorAnio" class="selector"></select>
+        </div>
+        <button id="btnTema" class="icon-btn" type="button" aria-label="Cambiar tema">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+            <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/>
+          </svg>
+        </button>
+      </div>
     </div>
   </header>
 
@@ -31,18 +64,15 @@
     <section class="hero container">
       <h1 class="hero-title">
         Festivos
-        <span class="hero-title-accent">Colombia</span>
-        <span class="hero-year">2026</span>
+        <span class="hero-title-accent" id="paisNombre">Colombia</span>
+        <span class="hero-year" id="anioNombre">2026</span>
       </h1>
-      <p class="hero-lead">
-        Diecinueve días para descansar, viajar o quedarse en casa. Aquí están
-        todos los festivos oficiales del año, los que cayeron en lunes por la
-        Ley Emiliani y los que se quedan en su fecha original.
+      <p class="hero-lead" id="heroLead">
+        Aquí están todos los festivos oficiales del año, los que se trasladan al lunes y los que se quedan en su fecha original.
       </p>
       <div class="hero-actions">
-        <button id="btnDescargar" class="btn-primary" type="button">
-          Descargar para Google Calendar
-        </button>
+        <button id="btnDescargar" class="btn-primary" type="button">Descargar para Google Calendar</button>
+        <button id="btnCompartir" class="btn-secondary" type="button">Compartir el sitio</button>
         <span class="hero-actions-meta" id="festivosRestantes"></span>
       </div>
     </section>
@@ -78,17 +108,15 @@
             </div>
           </div>
         </div>
+        <div id="nextBridge" class="next-bridge"></div>
       </div>
     </section>
 
     <section class="view-toggle container" aria-label="Cambiar vista">
       <div class="toggle-group" role="tablist">
-        <button class="toggle-btn active" data-view="calendar" role="tab" aria-selected="true">
-          Calendario
-        </button>
-        <button class="toggle-btn" data-view="list" role="tab" aria-selected="false">
-          Lista
-        </button>
+        <button class="toggle-btn active" data-view="calendar" role="tab" aria-selected="true">Calendario</button>
+        <button class="toggle-btn" data-view="list" role="tab" aria-selected="false">Lista</button>
+        <button class="toggle-btn" data-view="tools" role="tab" aria-selected="false">Herramientas</button>
       </div>
     </section>
 
@@ -99,58 +127,109 @@
     <section id="vistaLista" class="calendar container hidden" aria-label="Listado de festivos">
       <div class="filters">
         <button class="filter-btn active" data-filter="todos">Todos</button>
-        <button class="filter-btn" data-filter="emiliani">Ley Emiliani</button>
+        <button class="filter-btn" data-filter="emiliani">Trasladados</button>
         <button class="filter-btn" data-filter="fija">Fecha fija</button>
         <button class="filter-btn" data-filter="proximos">Próximos</button>
+        <button class="filter-btn" data-filter="favoritos">Favoritos</button>
       </div>
       <div id="listaFestivos" class="lista-festivos"></div>
+    </section>
+
+    <section id="vistaHerramientas" class="tools-view container hidden" aria-label="Herramientas">
+      <article class="tool-card">
+        <h3 class="tool-title">Calcular días hábiles</h3>
+        <p class="tool-desc">Cuenta cuántos días laborales hay entre dos fechas, descontando festivos y fines de semana.</p>
+        <div class="tool-form">
+          <div class="field">
+            <label for="diasHabilesDesde">Desde</label>
+            <input type="date" id="diasHabilesDesde" />
+          </div>
+          <div class="field">
+            <label for="diasHabilesHasta">Hasta</label>
+            <input type="date" id="diasHabilesHasta" />
+          </div>
+          <button id="btnCalcularHabiles" class="btn-primary" type="button">Calcular</button>
+        </div>
+        <div id="resultadoHabiles" class="tool-result"></div>
+      </article>
+
+      <article class="tool-card">
+        <h3 class="tool-title">Vacaciones óptimas</h3>
+        <p class="tool-desc">Te decimos qué días pedir para maximizar el descanso usando los festivos y fines de semana del año.</p>
+        <div class="tool-form">
+          <div class="field">
+            <label for="diasDisponibles">Días disponibles</label>
+            <input type="number" id="diasDisponibles" min="1" max="30" value="5" />
+          </div>
+          <div class="field">
+            <label for="vacacionesDesde">A partir de</label>
+            <input type="date" id="vacacionesDesde" />
+          </div>
+          <button id="btnSugerirVacaciones" class="btn-primary" type="button">Sugerir</button>
+        </div>
+        <div id="resultadoVacaciones" class="tool-result"></div>
+      </article>
+
+      <article class="tool-card">
+        <h3 class="tool-title">Comparador entre países</h3>
+        <p class="tool-desc">Mira qué festivos comparte el país seleccionado con otros de la región.</p>
+        <div class="comparador" id="comparadorPaises"></div>
+      </article>
+
+      <article class="tool-card">
+        <h3 class="tool-title">API pública</h3>
+        <p class="tool-desc">Los datos están disponibles como JSON para que otros desarrolladores los consuman.</p>
+        <div class="api-info">
+          <code id="apiEndpoint">GET /api/festivos?pais=co&amp;anio=2026</code>
+          <button id="btnCopiarApi" class="btn-ghost" type="button">Copiar</button>
+        </div>
+      </article>
     </section>
 
     <section class="info container">
       <div class="info-grid">
         <article class="info-card">
           <h3>Ley Emiliani</h3>
-          <p>
-            La Ley 51 de 1983 traslada al lunes siguiente algunos festivos
-            cuando no caen en lunes. Así se forman los famosos puentes.
-          </p>
+          <p>La Ley 51 de 1983 traslada al lunes siguiente algunos festivos cuando no caen en lunes. Así se forman los famosos puentes.</p>
         </article>
         <article class="info-card">
-          <h3>Fechas fijas</h3>
-          <p>
-            Hay festivos que siempre se celebran en su fecha original sin
-            importar el día de la semana: Año Nuevo, Día del Trabajo,
-            Independencia, Batalla de Boyacá, Inmaculada Concepción y Navidad.
-          </p>
+          <h3>Festivos móviles</h3>
+          <p>Jueves Santo, Viernes Santo, Ascensión, Corpus Christi y Sagrado Corazón cambian cada año según el Domingo de Resurrección, calculado con el algoritmo de Meeus.</p>
         </article>
         <article class="info-card">
-          <h3>Nuevo en 2026</h3>
-          <p>
-            El Día Nacional de Nuestra Señora del Rosario de Chiquinquirá entra
-            como festivo oficial. En 2026 se traslada al lunes 13 de julio.
-          </p>
+          <h3>Modo offline</h3>
+          <p>El sitio funciona como aplicación instalable. Después de la primera visita queda disponible sin conexión.</p>
         </article>
       </div>
     </section>
   </main>
 
-  <!-- Popover para mostrar info al hacer hover/tap -->
   <div id="popover" class="popover" role="dialog" aria-hidden="true">
     <button class="popover-close" type="button" aria-label="Cerrar">×</button>
     <span id="popoverTag" class="tag"></span>
     <h3 id="popoverNombre"></h3>
     <p id="popoverFecha"></p>
     <p id="popoverExtra" class="popover-extra"></p>
+    <div id="popoverBridge" class="popover-bridge"></div>
+    <div class="popover-actions">
+      <button id="popoverFav" class="btn-ghost" type="button">Guardar</button>
+      <button id="popoverShare" class="btn-ghost" type="button">Compartir</button>
+    </div>
   </div>
+
+  <div id="toast" class="toast" role="status" aria-live="polite"></div>
 
   <footer class="site-footer">
     <div class="container footer-inner">
       <span>Datos oficiales</span>
       <span aria-hidden="true">·</span>
       <span id="anioActual"></span>
+      <span aria-hidden="true">·</span>
+      <a href="#" id="linkInstall" class="footer-link hidden">Instalar como app</a>
     </div>
   </footer>
 
+  <script src="pascua.js"></script>
   <script src="script.js"></script>
 </body>
 </html>

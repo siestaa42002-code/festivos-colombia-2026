@@ -1,0 +1,29 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 630">
+  <defs>
+    <radialGradient id="glow" cx="50%" cy="0%" r="60%">
+      <stop offset="0%" stop-color="#E8B83B" stop-opacity="0.2"/>
+      <stop offset="100%" stop-color="#0E2A22" stop-opacity="0"/>
+    </radialGradient>
+  </defs>
+  <rect width="1200" height="630" fill="#0E2A22"/>
+  <rect width="1200" height="630" fill="url(#glow)"/>
+
+  <!-- Calendar icon -->
+  <g transform="translate(80, 80)">
+    <rect width="180" height="170" rx="14" fill="#143A2F" stroke="#E8B83B" stroke-width="4"/>
+    <rect width="180" height="42" rx="14" fill="#E8B83B"/>
+    <rect x="30" y="-8" width="14" height="30" rx="3" fill="#E55A4E"/>
+    <rect x="136" y="-8" width="14" height="30" rx="3" fill="#E55A4E"/>
+    <circle cx="50" cy="90" r="8" fill="#EDE6D3"/>
+    <circle cx="90" cy="90" r="8" fill="#EDE6D3"/>
+    <circle cx="130" cy="90" r="8" fill="#E55A4E"/>
+    <circle cx="50" cy="130" r="8" fill="#EDE6D3"/>
+    <circle cx="90" cy="130" r="8" fill="#E8B83B"/>
+    <circle cx="130" cy="130" r="8" fill="#EDE6D3"/>
+  </g>
+
+  <!-- Titles -->
+  <text x="80" y="380" font-family="Georgia, serif" font-size="120" font-weight="600" fill="#EDE6D3" letter-spacing="-4">Festivos</text>
+  <text x="80" y="490" font-family="Georgia, serif" font-size="120" font-weight="400" font-style="italic" fill="#E8B83B" letter-spacing="-4">Colombia</text>
+  <text x="80" y="560" font-family="monospace" font-size="40" fill="rgba(237, 230, 211, 0.7)">2026 · Calendario interactivo</text>
+</svg>
