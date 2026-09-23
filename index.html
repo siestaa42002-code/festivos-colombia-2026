@@ -1,34 +1,31 @@
 <!DOCTYPE html>
 <!--
-  Festivos - Calendario de días festivos
+  Festivos - Calendario de dias festivos
   Autor: siestaa42002-code
   Repositorio: https://github.com/siestaa42002-code/festivos-colombia-2026
-  Año: 2026
   Licencia: MIT
 -->
 <html lang="es" data-theme="claro">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <meta name="description" content="Calendario interactivo de días festivos. Puentes, sugerencias de vacaciones y calculadora de días hábiles." />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+  <meta name="description" content="Calendario interactivo de dias festivos. Puentes, vacaciones optimas y calculadora de dias habiles." />
   <meta name="theme-color" content="#FAFAF7" />
   <meta name="author" content="siestaa42002-code" />
-  <meta name="copyright" content="2026 siestaa42002-code" />
+
+  <meta name="mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="default" />
+  <meta name="apple-mobile-web-app-title" content="Festivos" />
 
   <meta property="og:type" content="website" />
   <meta property="og:site_name" content="Festivos" />
-  <meta property="og:title" content="Festivos · Calendario de días festivos" />
-  <meta property="og:description" content="Calendario interactivo con puentes, sugerencias de vacaciones y calculadora de días hábiles." />
+  <meta property="og:title" content="Festivos - Calendario de dias festivos" />
+  <meta property="og:description" content="Puentes, vacaciones optimas y calculadora de dias habiles." />
   <meta property="og:image" content="/og-image.svg" />
-  <meta property="og:image:width" content="1200" />
-  <meta property="og:image:height" content="630" />
-
-  <meta name="twitter:card" content="summary_large_image" />
-  <meta name="twitter:title" content="Festivos · Calendario de días festivos" />
-  <meta name="twitter:description" content="Calendario interactivo con puentes y sugerencias de vacaciones." />
-  <meta name="twitter:image" content="/og-image.svg" />
 
   <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+  <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
   <link rel="manifest" href="/manifest.json" />
 
   <title>Festivos</title>
@@ -45,7 +42,7 @@
   <div id="anuncioSr" class="sr-only" aria-live="polite" aria-atomic="true"></div>
 
   <div class="app">
-    <aside class="sidebar" aria-label="Navegación principal">
+    <aside class="sidebar" aria-label="Navegacion principal">
       <div class="sidebar-marca">
         <div class="marca-icono" aria-hidden="true">
           <span class="marca-cuadro"></span>
@@ -57,27 +54,27 @@
       </div>
 
       <nav class="sidebar-nav" role="tablist">
-        <button class="nav-item active" data-view="calendario" role="tab" aria-selected="true">
+        <button class="nav-item active" type="button" data-view="calendario" role="tab" aria-selected="true">
           <span class="nav-num">01</span>
           <span class="nav-label">Calendario</span>
         </button>
-        <button class="nav-item" data-view="lista" role="tab" aria-selected="false">
+        <button class="nav-item" type="button" data-view="lista" role="tab" aria-selected="false">
           <span class="nav-num">02</span>
           <span class="nav-label">Lista</span>
         </button>
-        <button class="nav-item" data-view="puentes" role="tab" aria-selected="false">
+        <button class="nav-item" type="button" data-view="puentes" role="tab" aria-selected="false">
           <span class="nav-num">03</span>
           <span class="nav-label">Puentes</span>
         </button>
-        <button class="nav-item" data-view="vacaciones" role="tab" aria-selected="false">
+        <button class="nav-item" type="button" data-view="vacaciones" role="tab" aria-selected="false">
           <span class="nav-num">04</span>
           <span class="nav-label">Vacaciones</span>
         </button>
-        <button class="nav-item" data-view="habiles" role="tab" aria-selected="false">
+        <button class="nav-item" type="button" data-view="habiles" role="tab" aria-selected="false">
           <span class="nav-num">05</span>
-          <span class="nav-label">Días hábiles</span>
+          <span class="nav-label">Habiles</span>
         </button>
-        <button class="nav-item" data-view="comparador" role="tab" aria-selected="false">
+        <button class="nav-item" type="button" data-view="comparador" role="tab" aria-selected="false">
           <span class="nav-num">06</span>
           <span class="nav-label">Comparar</span>
         </button>
@@ -87,26 +84,25 @@
         <div class="dropdown" id="dropdownAnio">
           <button type="button" class="dropdown-toggle" aria-haspopup="listbox" aria-expanded="false">
             <span class="dropdown-value">2026</span>
-            <span class="dropdown-chevron" aria-hidden="true">▾</span>
+            <span class="dropdown-chevron" aria-hidden="true">&#9662;</span>
           </button>
-          <ul class="dropdown-menu" role="listbox" aria-label="Año"></ul>
+          <ul class="dropdown-menu" role="listbox" aria-label="Anio"></ul>
         </div>
         <button id="btnTema" class="icon-btn" type="button" aria-label="Cambiar tema">
-          <span id="iconoTema">◐</span>
+          <span id="iconoTema">&#9680;</span>
         </button>
       </div>
     </aside>
 
     <main class="contenido">
-      <!-- Dock con próximo festivo -->
       <div class="proximo-dock" id="proximoDock">
         <div class="proximo-info">
-          <span class="proximo-label">Próximo festivo</span>
-          <span class="proximo-nombre" id="proximoNombre">—</span>
+          <span class="proximo-label">Proximo festivo</span>
+          <span class="proximo-nombre" id="proximoNombre">Cargando</span>
         </div>
         <div class="proximo-contador">
-          <span class="contador-numero" id="contadorDias">—</span>
-          <span class="contador-label" id="contadorLabel">días</span>
+          <span class="contador-numero" id="contadorDias">-</span>
+          <span class="contador-label" id="contadorLabel">dias</span>
         </div>
       </div>
 
@@ -116,20 +112,32 @@
           <span id="hoyTexto">Hoy</span>
         </p>
         <h1 class="hero-titulo">
-          <span>Días</span>
+          <span>Dias</span>
           <em class="acento">festivos</em>
         </h1>
-        <p class="hero-volante" id="heroVolante">
-          Calendario con puentes, sugerencias de vacaciones y calculadora de días hábiles.
+        <p class="hero-volante">
+          Calendario con puentes, vacaciones optimas y calculadora de dias habiles.
         </p>
       </section>
 
-      <!-- Vista: Calendario -->
+      <!-- Banner de instalacion -->
+      <div class="install-banner hidden" id="installBanner">
+        <div class="install-texto">
+          <strong id="installTitulo">Instalar en tu telefono</strong>
+          <span id="installDesc">Funciona sin conexion, como una app normal.</span>
+        </div>
+        <div class="install-acciones">
+          <button id="btnInstalar" class="btn-primario" type="button">Instalar</button>
+          <button id="btnCerrarInstall" class="btn-icono-cerrar" type="button" aria-label="Cerrar">&times;</button>
+        </div>
+      </div>
+
+      <!-- 01 Calendario -->
       <section id="vistaCalendario" class="vista" aria-label="Calendario">
         <header class="vista-encabezado">
           <span class="vista-numero">01</span>
-          <h2 class="vista-titulo">Calendario del año</h2>
-          <p class="vista-desc">Los festivos aparecen destacados. El día de hoy tiene borde marcado.</p>
+          <h2 class="vista-titulo">Calendario del anio</h2>
+          <p class="vista-desc">Los festivos aparecen en azul. El dia de hoy tiene contorno marcado.</p>
         </header>
         <div class="calendario-controles">
           <button id="btnIrHoy" class="btn-primario" type="button">Ir a hoy</button>
@@ -138,47 +146,47 @@
         <div id="calendarioGrid" class="calendario-grid"></div>
       </section>
 
-      <!-- Vista: Lista -->
+      <!-- 02 Lista -->
       <section id="vistaLista" class="vista hidden" aria-label="Lista de festivos">
         <header class="vista-encabezado">
           <span class="vista-numero">02</span>
           <h2 class="vista-titulo">Todos los festivos</h2>
-          <p class="vista-desc">Lista completa del año con tipo y traslados aplicados.</p>
+          <p class="vista-desc">Lista completa del anio con traslados aplicados.</p>
         </header>
         <div class="filtros">
-          <button class="filtro active" data-filtro="todos">Todos</button>
-          <button class="filtro" data-filtro="proximos">Próximos</button>
-          <button class="filtro" data-filtro="trasladados">Trasladados</button>
+          <button class="filtro active" type="button" data-filtro="todos">Todos</button>
+          <button class="filtro" type="button" data-filtro="proximos">Proximos</button>
+          <button class="filtro" type="button" data-filtro="trasladados">Trasladados</button>
         </div>
         <div id="listaFestivos" class="lista-festivos"></div>
       </section>
 
-      <!-- Vista: Puentes -->
+      <!-- 03 Puentes -->
       <section id="vistaPuentes" class="vista hidden" aria-label="Puentes">
         <header class="vista-encabezado">
           <span class="vista-numero">03</span>
-          <h2 class="vista-titulo">Puentes del año</h2>
-          <p class="vista-desc">Festivos que caen lunes o viernes y generan fin de semana largo.</p>
+          <h2 class="vista-titulo">Puentes del anio</h2>
+          <p class="vista-desc">Festivos que caen lunes o viernes y alargan el fin de semana.</p>
         </header>
         <div id="listaPuentes" class="lista-festivos"></div>
       </section>
 
-      <!-- Vista: Vacaciones -->
-      <section id="vistaVacaciones" class="vista hidden" aria-label="Sugerencias de vacaciones">
+      <!-- 04 Vacaciones -->
+      <section id="vistaVacaciones" class="vista hidden" aria-label="Vacaciones optimas">
         <header class="vista-encabezado">
           <span class="vista-numero">04</span>
-          <h2 class="vista-titulo">Vacaciones óptimas</h2>
-          <p class="vista-desc">Dónde conviene pedir días para maximizar el descanso.</p>
+          <h2 class="vista-titulo">Vacaciones optimas</h2>
+          <p class="vista-desc">Donde conviene pedir dias para maximizar el descanso.</p>
         </header>
         <div id="listaVacaciones" class="lista-vacaciones"></div>
       </section>
 
-      <!-- Vista: Días hábiles -->
-      <section id="vistaHabiles" class="vista hidden" aria-label="Calculadora de días hábiles">
+      <!-- 05 Habiles -->
+      <section id="vistaHabiles" class="vista hidden" aria-label="Calculadora de dias habiles">
         <header class="vista-encabezado">
           <span class="vista-numero">05</span>
-          <h2 class="vista-titulo">Días hábiles</h2>
-          <p class="vista-desc">Cuenta días laborales entre dos fechas, descontando festivos.</p>
+          <h2 class="vista-titulo">Dias habiles</h2>
+          <p class="vista-desc">Cuenta dias laborales entre dos fechas, sin fines de semana ni festivos.</p>
         </header>
         <div class="calculadora">
           <div class="campo">
@@ -189,20 +197,20 @@
             <label for="fechaFin" class="cintillo-mini">Hasta</label>
             <input type="date" id="fechaFin" class="input-fecha" />
           </div>
-          <div class="resultado-habiles" id="resultadoHabiles">
-            <span class="resultado-numero" id="numeroHabiles">—</span>
-            <span class="resultado-label">días hábiles</span>
+          <div class="resultado-habiles">
+            <span class="resultado-numero" id="numeroHabiles">-</span>
+            <span class="resultado-label">dias habiles</span>
             <span class="resultado-detalle" id="detalleHabiles"></span>
           </div>
         </div>
       </section>
 
-      <!-- Vista: Comparador -->
-      <section id="vistaComparador" class="vista hidden" aria-label="Comparador de países">
+      <!-- 06 Comparador -->
+      <section id="vistaComparador" class="vista hidden" aria-label="Comparador de paises">
         <header class="vista-encabezado">
           <span class="vista-numero">06</span>
-          <h2 class="vista-titulo">Comparar países</h2>
-          <p class="vista-desc">Cuántos festivos tiene cada país y cuáles comparten.</p>
+          <h2 class="vista-titulo">Comparar paises</h2>
+          <p class="vista-desc">Cuantos festivos y puentes tiene cada pais este anio.</p>
         </header>
         <div id="comparadorGrid" class="comparador-grid"></div>
       </section>

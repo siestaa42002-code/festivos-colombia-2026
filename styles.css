@@ -1,5 +1,5 @@
 /*
-  Festivos - Calendario de días festivos
+  Festivos - Calendario de dias festivos
   Autor: siestaa42002-code
   https://github.com/siestaa42002-code/festivos-colombia-2026
 */
@@ -11,7 +11,6 @@
   --azul: #3B82F6;
   --azul-hover: #2563EB;
   --coral: #F4715A;
-  --verde: #10B981;
   --ambar: #F59E0B;
 }
 
@@ -23,13 +22,15 @@
   --texto: #0D0D0F;
   --texto-medio: #535357;
   --texto-tenue: #8C8C92;
-  --texto-debil: #C8C8CD;
-  --borde: rgba(13, 13, 15, 0.08);
-  --borde-fuerte: rgba(13, 13, 15, 0.14);
+  --texto-debil: #C3C3C9;
+  --borde: rgba(13, 13, 15, 0.09);
+  --borde-fuerte: rgba(13, 13, 15, 0.16);
   --azul-texto: #1D4ED8;
-  --azul-suave: rgba(59, 130, 246, 0.1);
+  --azul-suave: rgba(59, 130, 246, 0.12);
+  --ambar-texto: #A16207;
+  --dock-bg: rgba(250, 250, 247, 0.88);
   --sombra-card: 0 1px 2px rgba(13, 13, 15, 0.04), 0 4px 12px rgba(13, 13, 15, 0.04);
-  --sombra-flotante: 0 8px 32px rgba(13, 13, 15, 0.06), 0 2px 6px rgba(13, 13, 15, 0.04);
+  --sombra-flotante: 0 8px 32px rgba(13, 13, 15, 0.07), 0 2px 6px rgba(13, 13, 15, 0.04);
 }
 
 [data-theme="oscuro"] {
@@ -41,10 +42,12 @@
   --texto-medio: #A0A0A8;
   --texto-tenue: #6A6A72;
   --texto-debil: #3A3A42;
-  --borde: rgba(255, 255, 255, 0.08);
-  --borde-fuerte: rgba(255, 255, 255, 0.16);
-  --azul-texto: #60A5FA;
-  --azul-suave: rgba(59, 130, 246, 0.18);
+  --borde: rgba(255, 255, 255, 0.09);
+  --borde-fuerte: rgba(255, 255, 255, 0.18);
+  --azul-texto: #7CB0FC;
+  --azul-suave: rgba(59, 130, 246, 0.2);
+  --ambar-texto: #FBBF24;
+  --dock-bg: rgba(10, 10, 12, 0.88);
   --sombra-card: 0 1px 2px rgba(0, 0, 0, 0.3), 0 4px 12px rgba(0, 0, 0, 0.3);
   --sombra-flotante: 0 8px 32px rgba(0, 0, 0, 0.5), 0 2px 6px rgba(0, 0, 0, 0.3);
 }
@@ -57,6 +60,7 @@
 
 html {
   scroll-behavior: smooth;
+  -webkit-text-size-adjust: 100%;
 }
 
 body {
@@ -66,8 +70,8 @@ body {
   line-height: 1.5;
   min-height: 100vh;
   -webkit-font-smoothing: antialiased;
-  font-feature-settings: "cv02", "cv03", "cv04", "cv11";
   transition: background-color 0.3s ease, color 0.3s ease;
+  padding-top: env(safe-area-inset-top, 0px);
 }
 
 .hidden {
@@ -92,7 +96,8 @@ body {
   min-height: 100vh;
 }
 
-/* Sidebar */
+/* ---------------------------------------------------------------- Sidebar */
+
 .sidebar {
   background: var(--bg-sutil);
   border-right: 1px solid var(--borde);
@@ -156,8 +161,9 @@ body {
   display: flex;
   align-items: center;
   gap: 0.85rem;
-  transition: all 0.15s ease;
+  transition: background 0.15s ease, color 0.15s ease;
   text-align: left;
+  -webkit-tap-highlight-color: transparent;
 }
 
 .nav-label {
@@ -169,7 +175,6 @@ body {
   font-size: 0.7rem;
   color: var(--texto-debil);
   font-weight: 500;
-  transition: color 0.15s ease;
 }
 
 .nav-item:hover {
@@ -198,7 +203,8 @@ body {
   padding-inline: 0.25rem;
 }
 
-/* Dropdown */
+/* -------------------------------------------------------------- Dropdown */
+
 .dropdown {
   position: relative;
   flex: 1;
@@ -211,15 +217,16 @@ body {
   border-radius: 8px;
   padding: 0.45rem 0.7rem;
   font-family: var(--geist-mono);
-  font-size: 0.75rem;
+  font-size: 0.78rem;
   font-weight: 500;
   cursor: pointer;
   display: inline-flex;
   align-items: center;
   gap: 0.45rem;
   justify-content: space-between;
-  transition: all 0.15s ease;
+  transition: border-color 0.15s ease;
   width: 100%;
+  -webkit-tap-highlight-color: transparent;
 }
 
 .dropdown-toggle:hover {
@@ -252,7 +259,7 @@ body {
   padding: 0.35rem;
   list-style: none;
   box-shadow: var(--sombra-flotante);
-  z-index: 100;
+  z-index: 200;
   max-height: 240px;
   overflow-y: auto;
   opacity: 0;
@@ -269,13 +276,13 @@ body {
 }
 
 .dropdown-menu li {
-  padding: 0.5rem 0.7rem;
+  padding: 0.55rem 0.7rem;
   font-family: var(--geist-mono);
-  font-size: 0.75rem;
+  font-size: 0.78rem;
   color: var(--texto-medio);
   border-radius: 6px;
   cursor: pointer;
-  transition: all 0.12s ease;
+  transition: background 0.12s ease, color 0.12s ease;
 }
 
 .dropdown-menu li:hover {
@@ -286,6 +293,7 @@ body {
 .dropdown-menu li.selected {
   background: var(--texto);
   color: var(--azul);
+  font-weight: 600;
 }
 
 .icon-btn {
@@ -296,7 +304,8 @@ body {
   padding: 0.45rem 0.65rem;
   cursor: pointer;
   font-size: 0.95rem;
-  transition: all 0.15s ease;
+  transition: border-color 0.15s ease, color 0.15s ease;
+  -webkit-tap-highlight-color: transparent;
 }
 
 .icon-btn:hover {
@@ -304,40 +313,39 @@ body {
   color: var(--azul-texto);
 }
 
-/* Contenido */
+/* ------------------------------------------------------------- Contenido */
+
 .contenido {
   padding: 1.5rem 3rem 4rem;
-  max-width: 1080px;
+  max-width: 1100px;
+  width: 100%;
 }
 
-/* Dock próximo festivo */
+/* Dock proximo festivo */
 .proximo-dock {
   position: sticky;
-  top: 1rem;
-  z-index: 30;
+  top: calc(1rem + env(safe-area-inset-top, 0px));
+  z-index: 40;
   display: flex;
   align-items: center;
   justify-content: space-between;
   gap: 1.5rem;
   margin-bottom: 1rem;
-  background: rgba(250, 250, 247, 0.85);
+  background: var(--dock-bg);
   backdrop-filter: blur(20px);
   -webkit-backdrop-filter: blur(20px);
-  padding: 0.85rem 1.25rem;
+  padding: 0.8rem 1.2rem;
   border-radius: 14px;
   border: 1px solid var(--borde);
   width: fit-content;
   margin-left: auto;
 }
 
-[data-theme="oscuro"] .proximo-dock {
-  background: rgba(10, 10, 12, 0.85);
-}
-
 .proximo-info {
   display: flex;
   flex-direction: column;
   gap: 0.1rem;
+  min-width: 0;
 }
 
 .proximo-label {
@@ -352,18 +360,22 @@ body {
   font-size: 0.92rem;
   font-weight: 600;
   color: var(--texto);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
 .proximo-contador {
   display: flex;
   align-items: baseline;
   gap: 0.35rem;
-  padding-left: 1.25rem;
+  padding-left: 1.2rem;
   border-left: 1px solid var(--borde);
+  flex-shrink: 0;
 }
 
 .contador-numero {
-  font-size: 1.75rem;
+  font-size: 1.7rem;
   font-weight: 700;
   color: var(--azul-texto);
   font-variant-numeric: tabular-nums;
@@ -376,15 +388,16 @@ body {
   color: var(--texto-tenue);
 }
 
-/* Hero */
+/* ------------------------------------------------------------------ Hero */
+
 .hero {
-  margin-bottom: 3.5rem;
+  margin-bottom: 2.5rem;
   padding-top: 2rem;
 }
 
 .cintillo {
   font-family: var(--geist-mono);
-  font-size: 0.78rem;
+  font-size: 0.76rem;
   color: var(--texto-medio);
   display: inline-flex;
   align-items: center;
@@ -402,7 +415,7 @@ body {
   background: var(--azul);
   display: inline-block;
   animation: parpadeo 2s infinite;
-  box-shadow: 0 0 8px rgba(59, 130, 246, 0.5);
+  flex-shrink: 0;
 }
 
 @keyframes parpadeo {
@@ -412,7 +425,7 @@ body {
 
 .hero-titulo {
   font-weight: 700;
-  font-size: clamp(2.75rem, 6vw, 4.5rem);
+  font-size: clamp(2.5rem, 6vw, 4.5rem);
   line-height: 1;
   letter-spacing: -0.04em;
   margin-top: 1.25rem;
@@ -421,7 +434,7 @@ body {
 .hero-titulo .acento {
   font-style: normal;
   font-weight: 700;
-  background: linear-gradient(135deg, var(--azul) 0%, #60A5FA 50%, var(--azul) 100%);
+  background: linear-gradient(135deg, var(--azul) 0%, #7CB0FC 50%, var(--azul) 100%);
   background-size: 200% 200%;
   -webkit-background-clip: text;
   background-clip: text;
@@ -436,13 +449,71 @@ body {
 }
 
 .hero-volante {
-  margin-top: 1.25rem;
-  font-size: 1.1rem;
+  margin-top: 1.1rem;
+  font-size: 1.05rem;
   color: var(--texto-medio);
-  max-width: 36rem;
+  max-width: 34rem;
 }
 
-/* Vistas */
+/* -------------------------------------------------- Banner de instalacion */
+
+.install-banner {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  background: var(--surface);
+  border: 1px solid var(--azul);
+  border-radius: 14px;
+  padding: 1rem 1.25rem;
+  margin-bottom: 2.5rem;
+  box-shadow: var(--sombra-card);
+  flex-wrap: wrap;
+}
+
+.install-texto {
+  display: flex;
+  flex-direction: column;
+  gap: 0.15rem;
+  min-width: 0;
+}
+
+.install-texto strong {
+  font-size: 0.95rem;
+  font-weight: 600;
+}
+
+.install-texto span {
+  font-size: 0.85rem;
+  color: var(--texto-medio);
+}
+
+.install-acciones {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  flex-shrink: 0;
+}
+
+.btn-icono-cerrar {
+  background: transparent;
+  border: none;
+  color: var(--texto-tenue);
+  font-size: 1.4rem;
+  line-height: 1;
+  cursor: pointer;
+  padding: 0.25rem 0.5rem;
+  border-radius: 6px;
+  transition: color 0.15s ease, background 0.15s ease;
+}
+
+.btn-icono-cerrar:hover {
+  color: var(--texto);
+  background: var(--bg-sutil);
+}
+
+/* ---------------------------------------------------------------- Vistas */
+
 .vista {
   margin-bottom: 4rem;
 }
@@ -460,7 +531,7 @@ body {
 }
 
 .vista-titulo {
-  font-size: clamp(1.75rem, 4vw, 2.5rem);
+  font-size: clamp(1.65rem, 4vw, 2.5rem);
   font-weight: 700;
   line-height: 1.1;
   letter-spacing: -0.025em;
@@ -469,7 +540,7 @@ body {
 
 .vista-desc {
   margin-top: 0.6rem;
-  font-size: 1rem;
+  font-size: 0.98rem;
   color: var(--texto-medio);
   max-width: 34rem;
 }
@@ -482,26 +553,26 @@ body {
   color: var(--texto-tenue);
 }
 
-/* Controles de calendario */
+/* ------------------------------------------------------------ Calendario */
+
 .calendario-controles {
   display: flex;
   align-items: center;
   justify-content: space-between;
   gap: 1rem;
-  margin-bottom: 2rem;
+  margin-bottom: 1.75rem;
   flex-wrap: wrap;
 }
 
 .resumen-anual {
   font-family: var(--geist-mono);
-  font-size: 0.8rem;
+  font-size: 0.78rem;
   color: var(--texto-tenue);
 }
 
-/* Calendario */
 .calendario-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  grid-template-columns: repeat(auto-fill, minmax(275px, 1fr));
   gap: 1rem;
 }
 
@@ -511,7 +582,7 @@ body {
   border-radius: 16px;
   padding: 1.25rem;
   box-shadow: var(--sombra-card);
-  transition: all 0.2s ease;
+  scroll-margin-top: 6rem;
 }
 
 .mes-card.mes-actual {
@@ -523,7 +594,7 @@ body {
   font-size: 1.05rem;
   font-weight: 600;
   text-transform: capitalize;
-  margin-bottom: 0.15rem;
+  margin-bottom: 0.1rem;
 }
 
 .mes-conteo {
@@ -537,7 +608,7 @@ body {
 .mes-dias-semana {
   display: grid;
   grid-template-columns: repeat(7, 1fr);
-  gap: 2px;
+  gap: 3px;
   margin-bottom: 6px;
 }
 
@@ -553,7 +624,7 @@ body {
 .mes-dias {
   display: grid;
   grid-template-columns: repeat(7, 1fr);
-  gap: 2px;
+  gap: 3px;
 }
 
 .dia {
@@ -561,12 +632,15 @@ body {
   display: flex;
   align-items: center;
   justify-content: center;
-  font-size: 0.8rem;
+  font-size: 0.82rem;
   font-variant-numeric: tabular-nums;
-  border-radius: 7px;
+  border-radius: 8px;
   color: var(--texto-medio);
-  position: relative;
-  transition: all 0.12s ease;
+  border: none;
+  background: transparent;
+  font-family: var(--geist);
+  padding: 0;
+  -webkit-tap-highlight-color: transparent;
 }
 
 .dia.vacio {
@@ -579,14 +653,17 @@ body {
 
 .dia.festivo {
   background: var(--azul);
-  color: white;
+  color: #FFFFFF;
   font-weight: 600;
   cursor: pointer;
+  transition: transform 0.12s ease, background 0.12s ease;
 }
 
-.dia.festivo:hover {
+.dia.festivo:hover,
+.dia.festivo:focus-visible {
   background: var(--azul-hover);
-  transform: scale(1.08);
+  transform: scale(1.1);
+  outline: none;
 }
 
 .dia.hoy {
@@ -596,11 +673,11 @@ body {
 }
 
 .dia.hoy.festivo {
-  box-shadow: inset 0 0 0 2px var(--texto);
-  color: white;
+  color: #FFFFFF;
 }
 
-/* Lista de festivos */
+/* ---------------------------------------------------------- Lista y cards */
+
 .filtros {
   display: inline-flex;
   background: var(--surface);
@@ -609,6 +686,8 @@ body {
   padding: 0.25rem;
   gap: 0.15rem;
   margin-bottom: 1.5rem;
+  max-width: 100%;
+  overflow-x: auto;
 }
 
 .filtro {
@@ -621,7 +700,9 @@ body {
   font-weight: 500;
   color: var(--texto-medio);
   cursor: pointer;
-  transition: all 0.15s ease;
+  white-space: nowrap;
+  transition: background 0.15s ease, color 0.15s ease;
+  -webkit-tap-highlight-color: transparent;
 }
 
 .filtro:hover {
@@ -643,17 +724,16 @@ body {
   background: var(--surface);
   border: 1px solid var(--borde);
   border-radius: 14px;
-  padding: 1.1rem 1.35rem;
+  padding: 1rem 1.25rem;
   display: flex;
   align-items: center;
-  gap: 1.25rem;
-  transition: all 0.18s cubic-bezier(0.4, 0, 0.2, 1);
+  gap: 1.1rem;
+  transition: border-color 0.18s ease, transform 0.18s ease;
 }
 
 .festivo-card:hover {
   border-color: var(--azul);
   transform: translateX(3px);
-  box-shadow: var(--sombra-card);
 }
 
 .festivo-card.pasado {
@@ -664,13 +744,14 @@ body {
   display: flex;
   flex-direction: column;
   align-items: center;
-  min-width: 56px;
-  padding-right: 1.25rem;
+  min-width: 52px;
+  padding-right: 1.1rem;
   border-right: 1px solid var(--borde);
+  flex-shrink: 0;
 }
 
 .festivo-dia {
-  font-size: 1.6rem;
+  font-size: 1.55rem;
   font-weight: 700;
   line-height: 1;
   font-variant-numeric: tabular-nums;
@@ -678,7 +759,7 @@ body {
 
 .festivo-mes {
   font-family: var(--geist-mono);
-  font-size: 0.65rem;
+  font-size: 0.64rem;
   text-transform: uppercase;
   color: var(--texto-tenue);
   margin-top: 0.2rem;
@@ -690,16 +771,16 @@ body {
 }
 
 .festivo-nombre {
-  font-size: 1rem;
+  font-size: 0.98rem;
   font-weight: 600;
-  margin-bottom: 0.2rem;
+  margin-bottom: 0.25rem;
 }
 
 .festivo-meta {
-  font-size: 0.82rem;
+  font-size: 0.8rem;
   color: var(--texto-tenue);
   display: flex;
-  gap: 0.5rem;
+  gap: 0.45rem;
   align-items: center;
   flex-wrap: wrap;
 }
@@ -707,13 +788,14 @@ body {
 .tag {
   font-family: var(--geist-mono);
   font-size: 0.62rem;
-  padding: 0.12rem 0.45rem;
+  padding: 0.14rem 0.45rem;
   border-radius: 999px;
   background: var(--bg-sutil);
   border: 1px solid var(--borde);
   color: var(--texto-medio);
   text-transform: uppercase;
   letter-spacing: 0.03em;
+  white-space: nowrap;
 }
 
 .tag.puente {
@@ -724,19 +806,23 @@ body {
 }
 
 .tag.trasladado {
-  background: rgba(245, 158, 11, 0.12);
+  background: rgba(245, 158, 11, 0.14);
   border-color: transparent;
-  color: #B45309;
+  color: var(--ambar-texto);
+  font-weight: 600;
 }
 
-[data-theme="oscuro"] .tag.trasladado {
-  color: var(--ambar);
+.mensaje-vacio {
+  color: var(--texto-tenue);
+  font-size: 0.95rem;
+  padding: 2rem 0;
 }
 
-/* Vacaciones */
+/* ----------------------------------------------------------- Vacaciones */
+
 .lista-vacaciones {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+  grid-template-columns: repeat(auto-fill, minmax(255px, 1fr));
   gap: 1rem;
 }
 
@@ -746,17 +832,16 @@ body {
   border-radius: 16px;
   padding: 1.5rem;
   box-shadow: var(--sombra-card);
-  transition: all 0.18s ease;
+  transition: border-color 0.18s ease, transform 0.18s ease;
 }
 
 .vacacion-card:hover {
   border-color: var(--azul);
   transform: translateY(-2px);
-  box-shadow: var(--sombra-flotante);
 }
 
 .vacacion-ratio {
-  font-size: 2.5rem;
+  font-size: 2.4rem;
   font-weight: 700;
   color: var(--azul-texto);
   line-height: 1;
@@ -765,7 +850,7 @@ body {
 
 .vacacion-ratio-label {
   font-family: var(--geist-mono);
-  font-size: 0.68rem;
+  font-size: 0.66rem;
   color: var(--texto-tenue);
   text-transform: uppercase;
   letter-spacing: 0.04em;
@@ -774,9 +859,9 @@ body {
 }
 
 .vacacion-nombre {
-  font-size: 1rem;
+  font-size: 0.98rem;
   font-weight: 600;
-  margin-bottom: 0.35rem;
+  margin-bottom: 0.4rem;
 }
 
 .vacacion-detalle {
@@ -785,12 +870,20 @@ body {
   line-height: 1.6;
 }
 
-/* Calculadora */
+.vacacion-rango {
+  margin-top: 0.75rem;
+  font-family: var(--geist-mono);
+  font-size: 0.72rem;
+  color: var(--texto-tenue);
+}
+
+/* --------------------------------------------------------- Calculadora */
+
 .calculadora {
   background: var(--surface);
   border: 1px solid var(--borde);
   border-radius: 18px;
-  padding: 2rem;
+  padding: 1.75rem;
   max-width: 520px;
   box-shadow: var(--sombra-card);
 }
@@ -808,10 +901,13 @@ body {
   border-radius: 10px;
   padding: 0.75rem 1rem;
   font-family: var(--geist);
-  font-size: 0.95rem;
+  font-size: 1rem;
   color: var(--texto);
   width: 100%;
-  transition: all 0.15s ease;
+  transition: border-color 0.15s ease, box-shadow 0.15s ease;
+  -webkit-appearance: none;
+  appearance: none;
+  min-height: 48px;
 }
 
 .input-fecha:focus {
@@ -820,15 +916,19 @@ body {
   box-shadow: 0 0 0 3px var(--azul-suave);
 }
 
+[data-theme="oscuro"] .input-fecha::-webkit-calendar-picker-indicator {
+  filter: invert(1);
+}
+
 .resultado-habiles {
-  margin-top: 1.75rem;
-  padding-top: 1.75rem;
+  margin-top: 1.5rem;
+  padding-top: 1.5rem;
   border-top: 1px solid var(--borde);
   text-align: center;
 }
 
 .resultado-numero {
-  font-size: 3.5rem;
+  font-size: 3.25rem;
   font-weight: 700;
   color: var(--azul-texto);
   line-height: 1;
@@ -838,7 +938,7 @@ body {
 
 .resultado-label {
   font-family: var(--geist-mono);
-  font-size: 0.75rem;
+  font-size: 0.72rem;
   color: var(--texto-tenue);
   text-transform: uppercase;
   letter-spacing: 0.05em;
@@ -853,10 +953,11 @@ body {
   margin-top: 0.85rem;
 }
 
-/* Comparador */
+/* --------------------------------------------------------- Comparador */
+
 .comparador-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+  grid-template-columns: repeat(auto-fill, minmax(215px, 1fr));
   gap: 1rem;
 }
 
@@ -866,13 +967,12 @@ body {
   border-radius: 16px;
   padding: 1.5rem;
   box-shadow: var(--sombra-card);
-  transition: all 0.18s ease;
+  transition: border-color 0.18s ease, transform 0.18s ease;
 }
 
 .pais-card:hover {
   border-color: var(--azul);
   transform: translateY(-2px);
-  box-shadow: var(--sombra-flotante);
 }
 
 .pais-card.destacado {
@@ -881,13 +981,13 @@ body {
 }
 
 .pais-nombre {
-  font-size: 1.05rem;
+  font-size: 1.02rem;
   font-weight: 600;
   margin-bottom: 0.75rem;
 }
 
 .pais-numero {
-  font-size: 2.75rem;
+  font-size: 2.6rem;
   font-weight: 700;
   line-height: 1;
   color: var(--azul-texto);
@@ -896,7 +996,7 @@ body {
 
 .pais-label {
   font-family: var(--geist-mono);
-  font-size: 0.68rem;
+  font-size: 0.66rem;
   color: var(--texto-tenue);
   text-transform: uppercase;
   letter-spacing: 0.04em;
@@ -912,7 +1012,8 @@ body {
   color: var(--texto-medio);
 }
 
-/* Botones */
+/* ------------------------------------------------------------- Botones */
+
 .btn-primario {
   background: var(--texto);
   color: var(--bg);
@@ -923,12 +1024,18 @@ body {
   font-size: 0.9rem;
   font-weight: 600;
   cursor: pointer;
-  transition: all 0.15s cubic-bezier(0.4, 0, 0.2, 1);
+  transition: transform 0.15s ease, box-shadow 0.15s ease;
+  min-height: 44px;
+  -webkit-tap-highlight-color: transparent;
 }
 
 .btn-primario:hover {
   transform: translateY(-1px);
-  box-shadow: 0 8px 24px rgba(13, 13, 15, 0.2);
+  box-shadow: 0 8px 22px rgba(13, 13, 15, 0.18);
+}
+
+.btn-primario:active {
+  transform: translateY(0);
 }
 
 .btn-primario:focus-visible {
@@ -936,9 +1043,10 @@ body {
   outline-offset: 2px;
 }
 
-/* Footer */
+/* -------------------------------------------------------------- Footer */
+
 .footer {
-  margin-top: 5rem;
+  margin-top: 4rem;
   padding-top: 2rem;
   border-top: 1px solid var(--borde);
   display: flex;
@@ -949,7 +1057,7 @@ body {
 }
 
 .footer-firma {
-  font-size: 0.9rem;
+  font-size: 0.88rem;
   color: var(--texto-medio);
   display: inline-flex;
   align-items: center;
@@ -968,7 +1076,7 @@ body {
 
 .footer-meta {
   font-family: var(--geist-mono);
-  font-size: 0.78rem;
+  font-size: 0.76rem;
   color: var(--texto-tenue);
   display: inline-flex;
   align-items: center;
@@ -981,22 +1089,23 @@ body {
   font-weight: 600;
 }
 
-/* Toast */
+/* --------------------------------------------------------------- Toast */
+
 .toast {
   position: fixed;
-  bottom: 2rem;
+  bottom: calc(2rem + env(safe-area-inset-bottom, 0px));
   left: 50%;
-  transform: translate(-50%, 100px);
+  transform: translate(-50%, 120px);
   background: var(--texto);
   color: var(--bg);
-  padding: 0.85rem 1.5rem;
+  padding: 0.85rem 1.4rem;
   border-radius: 12px;
   font-size: 0.88rem;
   font-weight: 500;
   box-shadow: var(--sombra-flotante);
   opacity: 0;
   transition: opacity 0.25s ease, transform 0.25s ease;
-  z-index: 150;
+  z-index: 300;
   pointer-events: none;
   max-width: 90vw;
   text-align: center;
@@ -1007,7 +1116,8 @@ body {
   transform: translate(-50%, 0);
 }
 
-/* Responsive */
+/* ---------------------------------------------------------- Responsive */
+
 @media (max-width: 900px) {
   .app {
     grid-template-columns: 1fr;
@@ -1020,12 +1130,13 @@ body {
     right: 0;
     top: auto;
     height: auto;
-    padding: 0.5rem 0.75rem;
+    padding: 0.5rem 0.6rem;
+    padding-bottom: calc(0.5rem + env(safe-area-inset-bottom, 0px));
     flex-direction: row;
-    z-index: 50;
+    z-index: 100;
     border-top: 1px solid var(--borde);
     border-right: none;
-    background: var(--bg-sutil);
+    background: var(--dock-bg);
     backdrop-filter: blur(20px);
     -webkit-backdrop-filter: blur(20px);
   }
@@ -1048,19 +1159,22 @@ body {
 
   .nav-item {
     flex-direction: column;
-    gap: 0.15rem;
-    padding: 0.55rem 0.8rem;
+    gap: 0.1rem;
+    padding: 0.5rem 0.7rem;
     border-radius: 8px;
     white-space: nowrap;
     flex-shrink: 0;
+    min-width: 62px;
+    align-items: center;
   }
 
   .nav-num {
-    font-size: 0.6rem;
+    font-size: 0.58rem;
   }
 
   .nav-label {
-    font-size: 0.72rem;
+    font-size: 0.7rem;
+    flex: none;
   }
 
   .sidebar-foot {
@@ -1068,26 +1182,37 @@ body {
     padding: 0;
     border-left: 1px solid var(--borde);
     padding-left: 0.5rem;
-    margin-left: 0.25rem;
+    margin-left: 0.3rem;
+    flex-shrink: 0;
+  }
+
+  .sidebar-foot .dropdown {
+    min-width: 72px;
   }
 
   .sidebar-foot .dropdown-toggle {
-    padding: 0.4rem 0.5rem;
-    font-size: 0.7rem;
+    padding: 0.45rem 0.5rem;
+    font-size: 0.72rem;
   }
 
   .sidebar-foot .dropdown-menu {
     right: 0;
     left: auto;
+    min-width: 110px;
   }
 
   .contenido {
-    padding: 1rem 1.25rem 6rem;
+    padding: 1rem 1.15rem 7rem;
   }
 
   .proximo-dock {
     width: 100%;
     margin-left: 0;
+  }
+
+  .hero {
+    padding-top: 1.5rem;
+    margin-bottom: 2rem;
   }
 
   .calendario-grid {
@@ -1099,8 +1224,33 @@ body {
     grid-template-columns: 1fr;
   }
 
-  .footer {
-    margin-bottom: 3rem;
+  .calendario-controles {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 0.75rem;
+  }
+
+  .install-banner {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 0.85rem;
+  }
+
+  .install-acciones {
+    justify-content: space-between;
+  }
+
+  .install-acciones .btn-primario {
+    flex: 1;
+  }
+
+  .festivo-card {
+    padding: 0.85rem 1rem;
+    gap: 0.9rem;
+  }
+
+  .mes-card {
+    scroll-margin-top: 5rem;
   }
 }
 
@@ -1110,5 +1260,6 @@ body {
   *::after {
     animation-duration: 0.01ms !important;
     transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
   }
 }

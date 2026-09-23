@@ -1,13 +1,41 @@
 {
-  "name": "Festivos",
+  "name": "Festivos - Calendario de dias festivos",
   "short_name": "Festivos",
-  "description": "Calendario de días festivos con puentes y sugerencias de vacaciones.",
+  "description": "Calendario de dias festivos con puentes, vacaciones optimas y calculadora de dias habiles.",
+  "id": "/",
   "start_url": "/",
+  "scope": "/",
   "display": "standalone",
+  "orientation": "portrait-primary",
   "background_color": "#FAFAF7",
   "theme_color": "#FAFAF7",
-  "orientation": "portrait-primary",
+  "lang": "es",
+  "dir": "ltr",
+  "categories": ["productivity", "utilities"],
   "icons": [
-    { "src": "/favicon.svg", "sizes": "any", "type": "image/svg+xml", "purpose": "any" }
+    {
+      "src": "/icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "/icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "/icon-maskable-192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "maskable"
+    },
+    {
+      "src": "/icon-maskable-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "maskable"
+    }
   ]
 }

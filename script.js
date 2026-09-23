@@ -1,687 +1,827 @@
 /*
-  Festivos - Calendario de días festivos
+  Festivos - Calendario de dias festivos
   Autor: siestaa42002-code
   https://github.com/siestaa42002-code/festivos-colombia-2026
+  Licencia: MIT
 */
 
-// ===========================================================================
-// Estado
-// ===========================================================================
+(function () {
+  "use strict";
 
-const STORAGE = {
-  tema: "festivos:tema",
-  anio: "festivos:anio",
-};
+  // =========================================================================
+  // Estado
+  // =========================================================================
 
-const HOY = hoyEnBogota();
+  var STORAGE = {
+    tema: "festivos:tema",
+    anio: "festivos:anio",
+    installCerrado: "festivos:installCerrado"
+  };
 
-const estado = {
-  tema: localStorage.getItem(STORAGE.tema) || "claro",
-  anio: parseInt(localStorage.getItem(STORAGE.anio), 10) || HOY.getUTCFullYear(),
-  vistaActiva: "calendario",
-  filtroLista: "todos",
-  festivos: [],
-};
+  var HOY = hoyEnBogota();
 
-window.estado = estado;
+  var estado = {
+    tema: leerLS(STORAGE.tema) || "claro",
+    anio: parseInt(leerLS(STORAGE.anio), 10) || HOY.getUTCFullYear(),
+    vistaActiva: "calendario",
+    filtroLista: "todos",
+    festivos: []
+  };
 
-// ===========================================================================
-// Helpers de UI
-// ===========================================================================
-
-function mostrarToast(mensaje, duracion = 2600) {
-  const toast = document.getElementById("toast");
-  toast.textContent = mensaje;
-  toast.classList.add("visible");
-  clearTimeout(mostrarToast._t);
-  mostrarToast._t = setTimeout(() => toast.classList.remove("visible"), duracion);
-}
-
-function anunciar(mensaje) {
-  const el = document.getElementById("anuncioSr");
-  if (el) el.textContent = mensaje;
-}
-
-function inputDate(fecha) {
-  return claveFecha(fecha);
-}
-
-function parseInputDate(valor) {
-  if (!valor) return null;
-  const [y, m, d] = valor.split("-").map(Number);
-  return crearFecha(y, m, d);
-}
-
-// ===========================================================================
-// Carga de festivos
-// ===========================================================================
-
-function recargarFestivos() {
-  estado.festivos = obtenerFestivos("co", estado.anio);
-}
-
-// ===========================================================================
-// Próximo festivo
-// ===========================================================================
-
-function actualizarProximoFestivo() {
-  // Busca el próximo festivo desde hoy, incluso si cae en el año siguiente
-  let candidatos = obtenerFestivos("co", HOY.getUTCFullYear()).filter((f) => f.fecha >= HOY);
-
-  if (candidatos.length === 0) {
-    candidatos = obtenerFestivos("co", HOY.getUTCFullYear() + 1);
+  function leerLS(clave) {
+    try {
+      return localStorage.getItem(clave);
+    } catch (e) {
+      return null;
+    }
   }
 
-  const proximo = candidatos[0];
-  if (!proximo) return;
-
-  const diffMs = proximo.fecha - HOY;
-  const dias = Math.round(diffMs / 86400000);
-
-  document.getElementById("proximoNombre").textContent = proximo.nombre;
-  document.getElementById("contadorDias").textContent = dias === 0 ? "Hoy" : dias;
-  document.getElementById("contadorLabel").textContent =
-    dias === 0 ? "es festivo" : dias === 1 ? "día" : "días";
-}
-
-function actualizarHoyTexto() {
-  document.getElementById("hoyTexto").textContent = formatearFechaLarga(HOY);
-}
-
-// ===========================================================================
-// Vista: Calendario
-// ===========================================================================
-
-function renderCalendario() {
-  const grid = document.getElementById("calendarioGrid");
-  grid.innerHTML = "";
-
-  const clavesFestivos = {};
-  estado.festivos.forEach((f) => {
-    clavesFestivos[claveFecha(f.fecha)] = f;
-  });
-
-  const claveHoy = claveFecha(HOY);
-  const mesActual = HOY.getUTCMonth();
-  const esAnioActual = estado.anio === HOY.getUTCFullYear();
-
-  for (let mes = 0; mes < 12; mes++) {
-    const card = document.createElement("div");
-    card.className = "mes-card";
-    card.id = `mes-${mes}`;
-    if (esAnioActual && mes === mesActual) {
-      card.classList.add("mes-actual");
+  function guardarLS(clave, valor) {
+    try {
+      localStorage.setItem(clave, valor);
+    } catch (e) {
+      // Modo privado o storage lleno: seguimos sin persistir
     }
+  }
 
-    const titulo = document.createElement("h3");
-    titulo.className = "mes-titulo";
-    titulo.textContent = MESES[mes];
-    card.appendChild(titulo);
+  // =========================================================================
+  // Helpers de DOM (todos con guard)
+  // =========================================================================
 
-    // Contar festivos del mes
-    const festivosDelMes = estado.festivos.filter((f) => f.fecha.getUTCMonth() === mes);
-    const conteo = document.createElement("span");
-    conteo.className = "mes-conteo";
-    conteo.textContent = festivosDelMes.length === 0
-      ? "Sin festivos"
-      : festivosDelMes.length === 1
-        ? "1 festivo"
-        : `${festivosDelMes.length} festivos`;
-    card.appendChild(conteo);
+  function $(id) {
+    return document.getElementById(id);
+  }
 
-    // Encabezado días de la semana
-    const encabezado = document.createElement("div");
-    encabezado.className = "mes-dias-semana";
-    DIAS_SEMANA_CORTO.forEach((d) => {
-      const el = document.createElement("span");
-      el.className = "dia-semana";
-      el.textContent = d;
-      encabezado.appendChild(el);
+  function setTexto(id, texto) {
+    var el = $(id);
+    if (el) el.textContent = texto;
+  }
+
+  function onClick(id, fn) {
+    var el = $(id);
+    if (el) el.addEventListener("click", fn);
+  }
+
+  function mostrarToast(mensaje, duracion) {
+    var toast = $("toast");
+    if (!toast) return;
+    toast.textContent = mensaje;
+    toast.classList.add("visible");
+    clearTimeout(mostrarToast._t);
+    mostrarToast._t = setTimeout(function () {
+      toast.classList.remove("visible");
+    }, duracion || 2600);
+  }
+
+  function anunciar(mensaje) {
+    setTexto("anuncioSr", mensaje);
+  }
+
+  function parseInputDate(valor) {
+    if (!valor) return null;
+    var partes = valor.split("-");
+    if (partes.length !== 3) return null;
+    return crearFecha(Number(partes[0]), Number(partes[1]), Number(partes[2]));
+  }
+
+  // =========================================================================
+  // Carga de datos
+  // =========================================================================
+
+  function recargarFestivos() {
+    estado.festivos = obtenerFestivos("co", estado.anio);
+  }
+
+  // =========================================================================
+  // Proximo festivo
+  // =========================================================================
+
+  function actualizarProximoFestivo() {
+    var candidatos = obtenerFestivos("co", HOY.getUTCFullYear()).filter(function (f) {
+      return f.fecha >= HOY;
     });
-    card.appendChild(encabezado);
 
-    // Días
-    const contenedorDias = document.createElement("div");
-    contenedorDias.className = "mes-dias";
-
-    const primerDia = crearFecha(estado.anio, mes + 1, 1);
-    const offset = primerDia.getUTCDay();
-    const ultimoDia = new Date(Date.UTC(estado.anio, mes + 1, 0)).getUTCDate();
-
-    for (let i = 0; i < offset; i++) {
-      const vacio = document.createElement("span");
-      vacio.className = "dia vacio";
-      contenedorDias.appendChild(vacio);
+    if (candidatos.length === 0) {
+      candidatos = obtenerFestivos("co", HOY.getUTCFullYear() + 1);
     }
 
-    for (let d = 1; d <= ultimoDia; d++) {
-      const fecha = crearFecha(estado.anio, mes + 1, d);
-      const clave = claveFecha(fecha);
-      const el = document.createElement("span");
-      el.className = "dia";
-      el.textContent = d;
+    var proximo = candidatos[0];
+    if (!proximo) return;
 
-      if (esFinDeSemana(fecha)) el.classList.add("finde");
+    var dias = Math.round((proximo.fecha - HOY) / 86400000);
 
-      const festivo = clavesFestivos[clave];
-      if (festivo) {
-        el.classList.add("festivo");
-        el.title = festivo.nombre;
-        el.setAttribute("role", "button");
-        el.setAttribute("tabindex", "0");
-        el.addEventListener("click", () => {
-          mostrarToast(`${festivo.nombre} · ${formatearFechaLarga(festivo.fecha)}`);
-        });
+    setTexto("proximoNombre", proximo.nombre);
+    setTexto("contadorDias", dias === 0 ? "Hoy" : String(dias));
+    setTexto("contadorLabel", dias === 0 ? "es festivo" : dias === 1 ? "dia" : "dias");
+  }
+
+  function actualizarHoyTexto() {
+    setTexto("hoyTexto", formatearFechaLarga(HOY));
+  }
+
+  // =========================================================================
+  // Vista 01: Calendario
+  // =========================================================================
+
+  function renderCalendario() {
+    var grid = $("calendarioGrid");
+    if (!grid) return;
+    grid.innerHTML = "";
+
+    var mapaFestivos = {};
+    estado.festivos.forEach(function (f) {
+      mapaFestivos[claveFecha(f.fecha)] = f;
+    });
+
+    var claveHoy = claveFecha(HOY);
+    var mesActual = HOY.getUTCMonth();
+    var esAnioActual = estado.anio === HOY.getUTCFullYear();
+
+    for (var mes = 0; mes < 12; mes++) {
+      var card = document.createElement("div");
+      card.className = "mes-card";
+      card.id = "mes-" + mes;
+      if (esAnioActual && mes === mesActual) card.classList.add("mes-actual");
+
+      var titulo = document.createElement("h3");
+      titulo.className = "mes-titulo";
+      titulo.textContent = MESES[mes];
+      card.appendChild(titulo);
+
+      var delMes = estado.festivos.filter(function (f) {
+        return f.fecha.getUTCMonth() === this.m;
+      }, { m: mes });
+
+      var conteo = document.createElement("span");
+      conteo.className = "mes-conteo";
+      conteo.textContent =
+        delMes.length === 0 ? "Sin festivos" :
+        delMes.length === 1 ? "1 festivo" :
+        delMes.length + " festivos";
+      card.appendChild(conteo);
+
+      var encabezado = document.createElement("div");
+      encabezado.className = "mes-dias-semana";
+      DIAS_SEMANA_CORTO.forEach(function (d) {
+        var el = document.createElement("span");
+        el.className = "dia-semana";
+        el.textContent = d;
+        encabezado.appendChild(el);
+      });
+      card.appendChild(encabezado);
+
+      var contenedorDias = document.createElement("div");
+      contenedorDias.className = "mes-dias";
+
+      var offset = crearFecha(estado.anio, mes + 1, 1).getUTCDay();
+      var ultimoDia = new Date(Date.UTC(estado.anio, mes + 1, 0)).getUTCDate();
+
+      for (var i = 0; i < offset; i++) {
+        var vacio = document.createElement("span");
+        vacio.className = "dia vacio";
+        contenedorDias.appendChild(vacio);
       }
 
-      if (clave === claveHoy) {
-        el.classList.add("hoy");
-        el.id = "diaHoy";
+      for (var d = 1; d <= ultimoDia; d++) {
+        contenedorDias.appendChild(crearDia(estado.anio, mes + 1, d, mapaFestivos, claveHoy));
       }
 
-      contenedorDias.appendChild(el);
+      card.appendChild(contenedorDias);
+      grid.appendChild(card);
     }
 
-    card.appendChild(contenedorDias);
-    grid.appendChild(card);
+    var puentes = detectarPuentes(estado.festivos);
+    setTexto("resumenAnual",
+      estado.festivos.length + " festivos y " + puentes.length + " puentes en " + estado.anio);
   }
 
-  // Resumen anual
-  const puentes = detectarPuentes(estado.festivos);
-  document.getElementById("resumenAnual").textContent =
-    `${estado.festivos.length} festivos · ${puentes.length} puentes en ${estado.anio}`;
-}
+  function crearDia(anio, mes, dia, mapaFestivos, claveHoy) {
+    var fecha = crearFecha(anio, mes, dia);
+    var clave = claveFecha(fecha);
+    var festivo = mapaFestivos[clave];
 
-function irAHoy() {
-  // Si el año mostrado no es el actual, cambiarlo primero
-  if (estado.anio !== HOY.getUTCFullYear()) {
-    estado.anio = HOY.getUTCFullYear();
-    localStorage.setItem(STORAGE.anio, estado.anio);
-    sincronizarDropdownAnio();
-    recargarFestivos();
-    renderTodo();
+    var el = document.createElement(festivo ? "button" : "span");
+    el.className = "dia";
+    el.textContent = String(dia);
+
+    if (esFinDeSemana(fecha)) el.classList.add("finde");
+    if (clave === claveHoy) el.classList.add("hoy");
+
+    if (festivo) {
+      el.type = "button";
+      el.classList.add("festivo");
+      el.title = festivo.nombre;
+      el.setAttribute("aria-label", festivo.nombre + ", " + formatearFechaLarga(fecha));
+      el.addEventListener("click", function () {
+        mostrarToast(festivo.nombre + " - " + formatearFechaLarga(festivo.fecha));
+      });
+    }
+
+    return el;
   }
 
-  // Asegurar que estamos en la vista calendario
-  if (estado.vistaActiva !== "calendario") {
-    cambiarVista("calendario");
+  function irAHoy() {
+    if (estado.anio !== HOY.getUTCFullYear()) {
+      estado.anio = HOY.getUTCFullYear();
+      guardarLS(STORAGE.anio, estado.anio);
+      sincronizarDropdownAnio();
+      recargarFestivos();
+      renderVistaActual();
+      renderCalendario();
+    }
+
+    if (estado.vistaActiva !== "calendario") {
+      cambiarVista("calendario");
+    }
+
+    setTimeout(desplazarAlMesActual, 150);
   }
 
-  setTimeout(() => {
-    const mesEl = document.getElementById(`mes-${HOY.getUTCMonth()}`);
-    if (mesEl) {
+  function desplazarAlMesActual() {
+    if (estado.anio !== HOY.getUTCFullYear()) return;
+    var mesEl = $("mes-" + HOY.getUTCMonth());
+    if (!mesEl) return;
+    try {
       mesEl.scrollIntoView({ behavior: "smooth", block: "center" });
+    } catch (e) {
+      mesEl.scrollIntoView();
     }
-  }, 120);
-}
-
-// ===========================================================================
-// Vista: Lista
-// ===========================================================================
-
-function renderLista() {
-  const contenedor = document.getElementById("listaFestivos");
-  contenedor.innerHTML = "";
-
-  let items = estado.festivos;
-
-  if (estado.filtroLista === "proximos") {
-    items = items.filter((f) => f.fecha >= HOY);
-  } else if (estado.filtroLista === "trasladados") {
-    items = items.filter((f) => f.trasladado);
   }
 
-  if (items.length === 0) {
-    const vacio = document.createElement("p");
-    vacio.className = "vista-desc";
-    vacio.textContent = "No hay festivos que coincidan con este filtro.";
-    contenedor.appendChild(vacio);
-    return;
-  }
+  // =========================================================================
+  // Vista 02: Lista
+  // =========================================================================
 
-  items.forEach((f) => {
-    contenedor.appendChild(crearCardFestivo(f));
-  });
-}
+  function renderLista() {
+    var contenedor = $("listaFestivos");
+    if (!contenedor) return;
+    contenedor.innerHTML = "";
 
-function crearCardFestivo(f) {
-  const card = document.createElement("article");
-  card.className = "festivo-card";
-  if (f.fecha < HOY) card.classList.add("pasado");
+    var items = estado.festivos;
 
-  const bloqueFecha = document.createElement("div");
-  bloqueFecha.className = "festivo-fecha";
+    if (estado.filtroLista === "proximos") {
+      items = items.filter(function (f) { return f.fecha >= HOY; });
+    } else if (estado.filtroLista === "trasladados") {
+      items = items.filter(function (f) { return f.trasladado; });
+    }
 
-  const dia = document.createElement("span");
-  dia.className = "festivo-dia";
-  dia.textContent = f.fecha.getUTCDate();
-  bloqueFecha.appendChild(dia);
-
-  const mes = document.createElement("span");
-  mes.className = "festivo-mes";
-  mes.textContent = MESES[f.fecha.getUTCMonth()].slice(0, 3);
-  bloqueFecha.appendChild(mes);
-
-  card.appendChild(bloqueFecha);
-
-  const info = document.createElement("div");
-  info.className = "festivo-info";
-
-  const nombre = document.createElement("h3");
-  nombre.className = "festivo-nombre";
-  nombre.textContent = f.nombre;
-  info.appendChild(nombre);
-
-  const meta = document.createElement("div");
-  meta.className = "festivo-meta";
-
-  const diaSemana = document.createElement("span");
-  diaSemana.textContent = DIAS_SEMANA[f.fecha.getUTCDay()];
-  meta.appendChild(diaSemana);
-
-  const d = f.fecha.getUTCDay();
-  if (d === 1 || d === 5) {
-    const tagPuente = document.createElement("span");
-    tagPuente.className = "tag puente";
-    tagPuente.textContent = "puente";
-    meta.appendChild(tagPuente);
-  }
-
-  if (f.trasladado && f.fechaOriginal) {
-    const tagTras = document.createElement("span");
-    tagTras.className = "tag trasladado";
-    tagTras.textContent = `movido del ${f.fechaOriginal.getUTCDate()} ${MESES[f.fechaOriginal.getUTCMonth()].slice(0, 3)}`;
-    meta.appendChild(tagTras);
-  }
-
-  info.appendChild(meta);
-  card.appendChild(info);
-
-  return card;
-}
-
-function inicializarFiltrosLista() {
-  document.querySelectorAll(".filtro[data-filtro]").forEach((btn) => {
-    btn.addEventListener("click", () => {
-      document.querySelectorAll(".filtro[data-filtro]").forEach((b) => b.classList.remove("active"));
-      btn.classList.add("active");
-      estado.filtroLista = btn.dataset.filtro;
-      renderLista();
-    });
-  });
-}
-
-// ===========================================================================
-// Vista: Puentes
-// ===========================================================================
-
-function renderPuentes() {
-  const contenedor = document.getElementById("listaPuentes");
-  contenedor.innerHTML = "";
-
-  const puentes = detectarPuentes(estado.festivos);
-
-  if (puentes.length === 0) {
-    const vacio = document.createElement("p");
-    vacio.className = "vista-desc";
-    vacio.textContent = "No hay puentes este año.";
-    contenedor.appendChild(vacio);
-    return;
-  }
-
-  puentes.forEach((f) => {
-    contenedor.appendChild(crearCardFestivo(f));
-  });
-}
-
-// ===========================================================================
-// Vista: Vacaciones
-// ===========================================================================
-
-function renderVacaciones() {
-  const contenedor = document.getElementById("listaVacaciones");
-  contenedor.innerHTML = "";
-
-  const sugerencias = sugerirVacaciones(estado.festivos, estado.anio, 4);
-
-  if (sugerencias.length === 0) {
-    const vacio = document.createElement("p");
-    vacio.className = "vista-desc";
-    vacio.textContent = "No se encontraron ventanas especialmente convenientes este año.";
-    contenedor.appendChild(vacio);
-    return;
-  }
-
-  sugerencias.forEach((s) => {
-    const card = document.createElement("article");
-    card.className = "vacacion-card";
-
-    const ratio = document.createElement("div");
-    ratio.className = "vacacion-ratio";
-    ratio.textContent = `${s.ratio}x`;
-    card.appendChild(ratio);
-
-    const ratioLabel = document.createElement("span");
-    ratioLabel.className = "vacacion-ratio-label";
-    ratioLabel.textContent = "rendimiento";
-    card.appendChild(ratioLabel);
-
-    const nombre = document.createElement("h3");
-    nombre.className = "vacacion-nombre";
-    nombre.textContent = s.festivo;
-    card.appendChild(nombre);
-
-    const detalle = document.createElement("p");
-    detalle.className = "vacacion-detalle";
-    detalle.textContent = `Pide ${s.diasPedidos} ${s.diasPedidos === 1 ? "día" : "días"} desde el ${formatearFechaLarga(s.inicio)} y descansas ${s.diasLibres} días seguidos.`;
-    card.appendChild(detalle);
-
-    contenedor.appendChild(card);
-  });
-}
-
-// ===========================================================================
-// Vista: Días hábiles
-// ===========================================================================
-
-function inicializarCalculadora() {
-  const inputInicio = document.getElementById("fechaInicio");
-  const inputFin = document.getElementById("fechaFin");
-
-  inputInicio.value = inputDate(HOY);
-  const finDefecto = sumarDias(HOY, 30);
-  inputFin.value = inputDate(finDefecto);
-
-  const calcular = () => {
-    const inicio = parseInputDate(inputInicio.value);
-    const fin = parseInputDate(inputFin.value);
-
-    if (!inicio || !fin) return;
-
-    if (fin < inicio) {
-      document.getElementById("numeroHabiles").textContent = "—";
-      document.getElementById("detalleHabiles").textContent = "La fecha final debe ser posterior a la inicial.";
+    if (items.length === 0) {
+      contenedor.appendChild(mensajeVacio("No hay festivos que coincidan con este filtro."));
       return;
     }
 
-    // Reunir festivos de todos los años involucrados
-    const anioInicio = inicio.getUTCFullYear();
-    const anioFin = fin.getUTCFullYear();
-    let todosFestivos = [];
-    for (let a = anioInicio; a <= anioFin; a++) {
-      todosFestivos = todosFestivos.concat(obtenerFestivos("co", a));
+    items.forEach(function (f) {
+      contenedor.appendChild(crearCardFestivo(f));
+    });
+  }
+
+  function mensajeVacio(texto) {
+    var p = document.createElement("p");
+    p.className = "mensaje-vacio";
+    p.textContent = texto;
+    return p;
+  }
+
+  function crearCardFestivo(f) {
+    var card = document.createElement("article");
+    card.className = "festivo-card";
+    if (f.fecha < HOY) card.classList.add("pasado");
+
+    var bloqueFecha = document.createElement("div");
+    bloqueFecha.className = "festivo-fecha";
+
+    var dia = document.createElement("span");
+    dia.className = "festivo-dia";
+    dia.textContent = String(f.fecha.getUTCDate());
+    bloqueFecha.appendChild(dia);
+
+    var mes = document.createElement("span");
+    mes.className = "festivo-mes";
+    mes.textContent = MESES[f.fecha.getUTCMonth()].slice(0, 3);
+    bloqueFecha.appendChild(mes);
+
+    card.appendChild(bloqueFecha);
+
+    var info = document.createElement("div");
+    info.className = "festivo-info";
+
+    var nombre = document.createElement("h3");
+    nombre.className = "festivo-nombre";
+    nombre.textContent = f.nombre;
+    info.appendChild(nombre);
+
+    var meta = document.createElement("div");
+    meta.className = "festivo-meta";
+
+    var diaSemana = document.createElement("span");
+    diaSemana.textContent = DIAS_SEMANA[f.fecha.getUTCDay()];
+    meta.appendChild(diaSemana);
+
+    var d = f.fecha.getUTCDay();
+    if (d === 1 || d === 5) {
+      var tagPuente = document.createElement("span");
+      tagPuente.className = "tag puente";
+      tagPuente.textContent = "puente";
+      meta.appendChild(tagPuente);
     }
 
-    const habiles = contarDiasHabiles(inicio, fin, todosFestivos);
-    const totalDias = Math.round((fin - inicio) / 86400000) + 1;
-    const festivosEnRango = todosFestivos.filter((f) => f.fecha >= inicio && f.fecha <= fin && !esFinDeSemana(f.fecha));
+    if (f.trasladado && f.fechaOriginal) {
+      var tagTras = document.createElement("span");
+      tagTras.className = "tag trasladado";
+      tagTras.textContent = "movido del " + f.fechaOriginal.getUTCDate() + " " +
+        MESES[f.fechaOriginal.getUTCMonth()].slice(0, 3);
+      meta.appendChild(tagTras);
+    }
 
-    document.getElementById("numeroHabiles").textContent = habiles;
-    document.getElementById("detalleHabiles").textContent =
-      `${totalDias} días naturales · ${festivosEnRango.length} ${festivosEnRango.length === 1 ? "festivo entre semana" : "festivos entre semana"}`;
-  };
+    info.appendChild(meta);
+    card.appendChild(info);
 
-  inputInicio.addEventListener("change", calcular);
-  inputFin.addEventListener("change", calcular);
-  calcular();
-}
-
-// ===========================================================================
-// Vista: Comparador
-// ===========================================================================
-
-function renderComparador() {
-  const contenedor = document.getElementById("comparadorGrid");
-  contenedor.innerHTML = "";
-
-  Object.keys(PAISES).forEach((codigo) => {
-    const pais = PAISES[codigo];
-    const festivos = obtenerFestivos(codigo, estado.anio);
-    const puentes = detectarPuentes(festivos);
-
-    const card = document.createElement("article");
-    card.className = "pais-card";
-    if (codigo === "co") card.classList.add("destacado");
-
-    const nombre = document.createElement("h3");
-    nombre.className = "pais-nombre";
-    nombre.textContent = pais.nombre;
-    card.appendChild(nombre);
-
-    const numero = document.createElement("div");
-    numero.className = "pais-numero";
-    numero.textContent = festivos.length;
-    card.appendChild(numero);
-
-    const label = document.createElement("span");
-    label.className = "pais-label";
-    label.textContent = "festivos nacionales";
-    card.appendChild(label);
-
-    const detalle = document.createElement("p");
-    detalle.className = "pais-puentes";
-    detalle.textContent = `${puentes.length} ${puentes.length === 1 ? "puente" : "puentes"} en el año`;
-    card.appendChild(detalle);
-
-    contenedor.appendChild(card);
-  });
-}
-
-// ===========================================================================
-// Navegación
-// ===========================================================================
-
-function cambiarVista(vista) {
-  document.querySelectorAll(".nav-item[data-view]").forEach((b) => {
-    b.classList.remove("active");
-    b.setAttribute("aria-selected", "false");
-  });
-  const btn = document.querySelector(`.nav-item[data-view="${vista}"]`);
-  if (btn) {
-    btn.classList.add("active");
-    btn.setAttribute("aria-selected", "true");
+    return card;
   }
-  estado.vistaActiva = vista;
 
-  document.querySelectorAll(".vista").forEach((v) => v.classList.add("hidden"));
-  const mapa = {
+  function inicializarFiltrosLista() {
+    var botones = document.querySelectorAll(".filtro[data-filtro]");
+    Array.prototype.forEach.call(botones, function (btn) {
+      btn.addEventListener("click", function () {
+        Array.prototype.forEach.call(botones, function (b) {
+          b.classList.remove("active");
+        });
+        btn.classList.add("active");
+        estado.filtroLista = btn.getAttribute("data-filtro");
+        renderLista();
+      });
+    });
+  }
+
+  // =========================================================================
+  // Vista 03: Puentes
+  // =========================================================================
+
+  function renderPuentes() {
+    var contenedor = $("listaPuentes");
+    if (!contenedor) return;
+    contenedor.innerHTML = "";
+
+    var puentes = detectarPuentes(estado.festivos);
+
+    if (puentes.length === 0) {
+      contenedor.appendChild(mensajeVacio("No hay puentes este anio."));
+      return;
+    }
+
+    puentes.forEach(function (f) {
+      contenedor.appendChild(crearCardFestivo(f));
+    });
+  }
+
+  // =========================================================================
+  // Vista 04: Vacaciones
+  // =========================================================================
+
+  function renderVacaciones() {
+    var contenedor = $("listaVacaciones");
+    if (!contenedor) return;
+    contenedor.innerHTML = "";
+
+    var sugerencias = sugerirVacaciones(estado.festivos, estado.anio, 4);
+
+    if (sugerencias.length === 0) {
+      contenedor.appendChild(mensajeVacio("No se encontraron ventanas especialmente convenientes este anio."));
+      return;
+    }
+
+    sugerencias.forEach(function (s) {
+      var card = document.createElement("article");
+      card.className = "vacacion-card";
+
+      var ratio = document.createElement("div");
+      ratio.className = "vacacion-ratio";
+      ratio.textContent = s.ratio + "x";
+      card.appendChild(ratio);
+
+      var ratioLabel = document.createElement("span");
+      ratioLabel.className = "vacacion-ratio-label";
+      ratioLabel.textContent = "rendimiento";
+      card.appendChild(ratioLabel);
+
+      var nombre = document.createElement("h3");
+      nombre.className = "vacacion-nombre";
+      nombre.textContent = s.festivo;
+      card.appendChild(nombre);
+
+      var detalle = document.createElement("p");
+      detalle.className = "vacacion-detalle";
+      detalle.textContent = "Pide " + s.diasPedidos + (s.diasPedidos === 1 ? " dia" : " dias") +
+        " y descansas " + s.diasLibres + " seguidos.";
+      card.appendChild(detalle);
+
+      var rango = document.createElement("p");
+      rango.className = "vacacion-rango";
+      rango.textContent = formatearCorto(s.inicio) + " a " + formatearCorto(s.fin);
+      card.appendChild(rango);
+
+      contenedor.appendChild(card);
+    });
+  }
+
+  function formatearCorto(fecha) {
+    return fecha.getUTCDate() + " " + MESES[fecha.getUTCMonth()].slice(0, 3);
+  }
+
+  // =========================================================================
+  // Vista 05: Dias habiles
+  // =========================================================================
+
+  function inicializarCalculadora() {
+    var inputInicio = $("fechaInicio");
+    var inputFin = $("fechaFin");
+    if (!inputInicio || !inputFin) return;
+
+    inputInicio.value = claveFecha(HOY);
+    inputFin.value = claveFecha(sumarDias(HOY, 30));
+
+    function calcular() {
+      var inicio = parseInputDate(inputInicio.value);
+      var fin = parseInputDate(inputFin.value);
+
+      if (!inicio || !fin) {
+        setTexto("numeroHabiles", "-");
+        setTexto("detalleHabiles", "");
+        return;
+      }
+
+      if (fin < inicio) {
+        setTexto("numeroHabiles", "-");
+        setTexto("detalleHabiles", "La fecha final debe ser posterior a la inicial.");
+        return;
+      }
+
+      var anioInicio = inicio.getUTCFullYear();
+      var anioFin = fin.getUTCFullYear();
+
+      if (anioFin - anioInicio > 20) {
+        setTexto("numeroHabiles", "-");
+        setTexto("detalleHabiles", "El rango es demasiado amplio. Usa menos de 20 anios.");
+        return;
+      }
+
+      var todos = [];
+      for (var a = anioInicio; a <= anioFin; a++) {
+        todos = todos.concat(obtenerFestivos("co", a));
+      }
+
+      var habiles = contarDiasHabiles(inicio, fin, todos);
+      var totalDias = Math.round((fin - inicio) / 86400000) + 1;
+      var festivosEnRango = todos.filter(function (f) {
+        return f.fecha >= inicio && f.fecha <= fin && !esFinDeSemana(f.fecha);
+      });
+
+      setTexto("numeroHabiles", String(habiles));
+      setTexto("detalleHabiles",
+        totalDias + " dias naturales y " + festivosEnRango.length +
+        (festivosEnRango.length === 1 ? " festivo entre semana" : " festivos entre semana"));
+    }
+
+    inputInicio.addEventListener("change", calcular);
+    inputInicio.addEventListener("input", calcular);
+    inputFin.addEventListener("change", calcular);
+    inputFin.addEventListener("input", calcular);
+    calcular();
+  }
+
+  // =========================================================================
+  // Vista 06: Comparador
+  // =========================================================================
+
+  function renderComparador() {
+    var contenedor = $("comparadorGrid");
+    if (!contenedor) return;
+    contenedor.innerHTML = "";
+
+    Object.keys(PAISES).forEach(function (codigo) {
+      var pais = PAISES[codigo];
+      var festivos = obtenerFestivos(codigo, estado.anio);
+      var puentes = detectarPuentes(festivos);
+
+      var card = document.createElement("article");
+      card.className = "pais-card";
+      if (codigo === "co") card.classList.add("destacado");
+
+      var nombre = document.createElement("h3");
+      nombre.className = "pais-nombre";
+      nombre.textContent = pais.nombre;
+      card.appendChild(nombre);
+
+      var numero = document.createElement("div");
+      numero.className = "pais-numero";
+      numero.textContent = String(festivos.length);
+      card.appendChild(numero);
+
+      var label = document.createElement("span");
+      label.className = "pais-label";
+      label.textContent = "festivos nacionales";
+      card.appendChild(label);
+
+      var detalle = document.createElement("p");
+      detalle.className = "pais-puentes";
+      detalle.textContent = puentes.length + (puentes.length === 1 ? " puente" : " puentes") + " en el anio";
+      card.appendChild(detalle);
+
+      contenedor.appendChild(card);
+    });
+  }
+
+  // =========================================================================
+  // Navegacion
+  // =========================================================================
+
+  var MAPA_VISTAS = {
     calendario: "vistaCalendario",
     lista: "vistaLista",
     puentes: "vistaPuentes",
     vacaciones: "vistaVacaciones",
     habiles: "vistaHabiles",
-    comparador: "vistaComparador",
+    comparador: "vistaComparador"
   };
-  const target = document.getElementById(mapa[vista]);
-  if (target) target.classList.remove("hidden");
 
-  if (vista === "lista") renderLista();
-  if (vista === "puentes") renderPuentes();
-  if (vista === "vacaciones") renderVacaciones();
-  if (vista === "comparador") renderComparador();
-}
+  function cambiarVista(vista) {
+    if (!MAPA_VISTAS[vista]) return;
 
-function inicializarNav() {
-  document.querySelectorAll(".nav-item[data-view]").forEach((btn) => {
-    btn.addEventListener("click", () => cambiarVista(btn.dataset.view));
-  });
-}
-
-// ===========================================================================
-// Dropdown de año
-// ===========================================================================
-
-function construirDropdownAnio() {
-  const menu = document.querySelector("#dropdownAnio .dropdown-menu");
-  menu.innerHTML = "";
-  const anioBase = HOY.getUTCFullYear();
-  for (let a = anioBase - 2; a <= anioBase + 4; a++) {
-    const li = document.createElement("li");
-    li.setAttribute("role", "option");
-    li.dataset.value = a;
-    li.textContent = a;
-    if (a === estado.anio) li.classList.add("selected");
-    menu.appendChild(li);
-  }
-}
-
-function sincronizarDropdownAnio() {
-  document.querySelectorAll("#dropdownAnio li").forEach((li) => {
-    li.classList.toggle("selected", parseInt(li.dataset.value, 10) === estado.anio);
-  });
-  document.querySelector("#dropdownAnio .dropdown-value").textContent = estado.anio;
-}
-
-function configurarDropdown(id, onChange) {
-  const dropdown = document.getElementById(id);
-  if (!dropdown) return;
-  const toggle = dropdown.querySelector(".dropdown-toggle");
-  const menu = dropdown.querySelector(".dropdown-menu");
-
-  menu.addEventListener("click", (e) => {
-    e.stopPropagation();
-    const li = e.target.closest("li[data-value]");
-    if (!li) return;
-    const valor = li.dataset.value;
-
-    menu.querySelectorAll("li").forEach((item) => item.classList.remove("selected"));
-    li.classList.add("selected");
-    toggle.querySelector(".dropdown-value").textContent = li.textContent.trim();
-
-    dropdown.classList.remove("open");
-    toggle.setAttribute("aria-expanded", "false");
-    onChange(valor);
-  });
-
-  toggle.addEventListener("click", (e) => {
-    e.stopPropagation();
-    const abierto = dropdown.classList.contains("open");
-    document.querySelectorAll(".dropdown.open").forEach((d) => {
-      if (d !== dropdown) {
-        d.classList.remove("open");
-        d.querySelector(".dropdown-toggle").setAttribute("aria-expanded", "false");
-      }
+    var items = document.querySelectorAll(".nav-item[data-view]");
+    Array.prototype.forEach.call(items, function (b) {
+      var activo = b.getAttribute("data-view") === vista;
+      b.classList.toggle("active", activo);
+      b.setAttribute("aria-selected", activo ? "true" : "false");
     });
-    dropdown.classList.toggle("open", !abierto);
-    toggle.setAttribute("aria-expanded", !abierto);
-  });
-}
 
-// ===========================================================================
-// Tema y PWA
-// ===========================================================================
+    estado.vistaActiva = vista;
 
-function aplicarTema() {
-  document.documentElement.setAttribute("data-theme", estado.tema);
-  const meta = document.querySelector('meta[name="theme-color"]');
-  if (meta) meta.setAttribute("content", estado.tema === "claro" ? "#FAFAF7" : "#0A0A0C");
-  const icono = document.getElementById("iconoTema");
-  if (icono) icono.textContent = estado.tema === "claro" ? "◐" : "◑";
-}
+    var vistas = document.querySelectorAll(".vista");
+    Array.prototype.forEach.call(vistas, function (v) {
+      v.classList.add("hidden");
+    });
 
-let deferredInstallPrompt = null;
+    var target = $(MAPA_VISTAS[vista]);
+    if (target) target.classList.remove("hidden");
 
-function inicializarPWA() {
-  if ("serviceWorker" in navigator) {
-    navigator.serviceWorker.register("/sw.js").catch(() => {});
+    renderVistaActual();
+    window.scrollTo({ top: 0, behavior: "smooth" });
   }
 
-  window.addEventListener("beforeinstallprompt", (e) => {
-    e.preventDefault();
-    deferredInstallPrompt = e;
-    const link = document.getElementById("linkInstall");
-    if (link) link.classList.remove("hidden");
-  });
+  function renderVistaActual() {
+    if (estado.vistaActiva === "lista") renderLista();
+    else if (estado.vistaActiva === "puentes") renderPuentes();
+    else if (estado.vistaActiva === "vacaciones") renderVacaciones();
+    else if (estado.vistaActiva === "comparador") renderComparador();
+  }
 
-  const link = document.getElementById("linkInstall");
-  if (link) {
-    link.addEventListener("click", async (e) => {
-      e.preventDefault();
-      if (!deferredInstallPrompt) return;
-      deferredInstallPrompt.prompt();
-      const { outcome } = await deferredInstallPrompt.userChoice;
-      if (outcome === "accepted") link.classList.add("hidden");
-      deferredInstallPrompt = null;
+  function inicializarNav() {
+    var items = document.querySelectorAll(".nav-item[data-view]");
+    Array.prototype.forEach.call(items, function (btn) {
+      btn.addEventListener("click", function () {
+        cambiarVista(btn.getAttribute("data-view"));
+      });
     });
   }
-}
 
-// ===========================================================================
-// Render general
-// ===========================================================================
+  // =========================================================================
+  // Dropdown de anio
+  // =========================================================================
 
-function renderTodo() {
-  renderCalendario();
-  if (estado.vistaActiva === "lista") renderLista();
-  if (estado.vistaActiva === "puentes") renderPuentes();
-  if (estado.vistaActiva === "vacaciones") renderVacaciones();
-  if (estado.vistaActiva === "comparador") renderComparador();
-}
+  function construirDropdownAnio() {
+    var menu = document.querySelector("#dropdownAnio .dropdown-menu");
+    if (!menu) return;
+    menu.innerHTML = "";
+    var base = HOY.getUTCFullYear();
+    for (var a = base - 2; a <= base + 4; a++) {
+      var li = document.createElement("li");
+      li.setAttribute("role", "option");
+      li.setAttribute("data-value", String(a));
+      li.textContent = String(a);
+      if (a === estado.anio) li.classList.add("selected");
+      menu.appendChild(li);
+    }
+  }
 
-// ===========================================================================
-// Init
-// ===========================================================================
+  function sincronizarDropdownAnio() {
+    var items = document.querySelectorAll("#dropdownAnio li");
+    Array.prototype.forEach.call(items, function (li) {
+      li.classList.toggle("selected", parseInt(li.getAttribute("data-value"), 10) === estado.anio);
+    });
+    var valor = document.querySelector("#dropdownAnio .dropdown-value");
+    if (valor) valor.textContent = String(estado.anio);
+  }
 
-function init() {
-  const anioFooter = document.getElementById("anioActual");
-  if (anioFooter) anioFooter.textContent = HOY.getUTCFullYear();
+  function configurarDropdown(id, onChange) {
+    var dropdown = $(id);
+    if (!dropdown) return;
+    var toggle = dropdown.querySelector(".dropdown-toggle");
+    var menu = dropdown.querySelector(".dropdown-menu");
+    if (!toggle || !menu) return;
 
-  aplicarTema();
-  actualizarHoyTexto();
-  recargarFestivos();
-  actualizarProximoFestivo();
+    menu.addEventListener("click", function (e) {
+      e.stopPropagation();
+      var li = e.target.closest ? e.target.closest("li[data-value]") : null;
+      if (!li) return;
 
-  construirDropdownAnio();
-  sincronizarDropdownAnio();
+      var items = menu.querySelectorAll("li");
+      Array.prototype.forEach.call(items, function (item) {
+        item.classList.remove("selected");
+      });
+      li.classList.add("selected");
 
-  renderCalendario();
-  inicializarNav();
-  inicializarFiltrosLista();
-  inicializarCalculadora();
+      var valorEl = toggle.querySelector(".dropdown-value");
+      if (valorEl) valorEl.textContent = li.textContent.trim();
 
-  configurarDropdown("dropdownAnio", (valor) => {
-    estado.anio = parseInt(valor, 10);
-    localStorage.setItem(STORAGE.anio, estado.anio);
-    recargarFestivos();
-    renderTodo();
-  });
+      dropdown.classList.remove("open");
+      toggle.setAttribute("aria-expanded", "false");
 
-  document.getElementById("btnTema").addEventListener("click", () => {
-    estado.tema = estado.tema === "claro" ? "oscuro" : "claro";
-    localStorage.setItem(STORAGE.tema, estado.tema);
-    aplicarTema();
-  });
+      onChange(li.getAttribute("data-value"));
+    });
 
-  document.getElementById("btnIrHoy").addEventListener("click", irAHoy);
+    toggle.addEventListener("click", function (e) {
+      e.stopPropagation();
+      var abierto = dropdown.classList.contains("open");
+      var abiertos = document.querySelectorAll(".dropdown.open");
+      Array.prototype.forEach.call(abiertos, function (d) {
+        if (d !== dropdown) {
+          d.classList.remove("open");
+          var t = d.querySelector(".dropdown-toggle");
+          if (t) t.setAttribute("aria-expanded", "false");
+        }
+      });
+      dropdown.classList.toggle("open", !abierto);
+      toggle.setAttribute("aria-expanded", abierto ? "false" : "true");
+    });
+  }
 
-  document.addEventListener("click", (e) => {
-    if (!e.target.closest(".dropdown")) {
-      document.querySelectorAll(".dropdown.open").forEach((d) => {
-        d.classList.remove("open");
-        d.querySelector(".dropdown-toggle").setAttribute("aria-expanded", "false");
+  // =========================================================================
+  // Tema
+  // =========================================================================
+
+  function aplicarTema() {
+    document.documentElement.setAttribute("data-theme", estado.tema);
+    var meta = document.querySelector('meta[name="theme-color"]');
+    if (meta) meta.setAttribute("content", estado.tema === "claro" ? "#FAFAF7" : "#0A0A0C");
+    setTexto("iconoTema", estado.tema === "claro" ? "\u25D0" : "\u25D1");
+  }
+
+  // =========================================================================
+  // PWA e instalacion
+  // =========================================================================
+
+  var promptInstalacion = null;
+
+  function esStandalone() {
+    return window.matchMedia("(display-mode: standalone)").matches ||
+      window.navigator.standalone === true;
+  }
+
+  function esIOS() {
+    return /iphone|ipad|ipod/i.test(navigator.userAgent) && !window.MSStream;
+  }
+
+  function mostrarBannerInstalacion() {
+    if (leerLS(STORAGE.installCerrado) === "si") return;
+    if (esStandalone()) return;
+    var banner = $("installBanner");
+    if (banner) banner.classList.remove("hidden");
+  }
+
+  function ocultarBannerInstalacion() {
+    var banner = $("installBanner");
+    if (banner) banner.classList.add("hidden");
+  }
+
+  function inicializarPWA() {
+    if ("serviceWorker" in navigator) {
+      window.addEventListener("load", function () {
+        navigator.serviceWorker.register("sw.js").catch(function () {});
       });
     }
-  });
 
-  inicializarPWA();
+    window.addEventListener("beforeinstallprompt", function (e) {
+      e.preventDefault();
+      promptInstalacion = e;
+      mostrarBannerInstalacion();
+      var link = $("linkInstall");
+      if (link) link.classList.remove("hidden");
+    });
 
-  // Al cargar, situarse automáticamente en el mes actual
-  if (estado.anio === HOY.getUTCFullYear()) {
-    setTimeout(() => {
-      const mesEl = document.getElementById(`mes-${HOY.getUTCMonth()}`);
-      if (mesEl) {
-        mesEl.scrollIntoView({ behavior: "smooth", block: "center" });
-      }
-    }, 400);
+    window.addEventListener("appinstalled", function () {
+      promptInstalacion = null;
+      ocultarBannerInstalacion();
+      var link = $("linkInstall");
+      if (link) link.classList.add("hidden");
+      mostrarToast("Instalada. Ya puedes abrirla desde tu pantalla de inicio.");
+    });
+
+    // iOS no dispara beforeinstallprompt: mostramos instrucciones
+    if (esIOS() && !esStandalone()) {
+      setTexto("installTitulo", "Anadir a la pantalla de inicio");
+      setTexto("installDesc", "Toca el boton Compartir y luego Anadir a inicio.");
+      var btn = $("btnInstalar");
+      if (btn) btn.textContent = "Como hacerlo";
+      mostrarBannerInstalacion();
+    }
+
+    onClick("btnInstalar", instalarApp);
+    onClick("linkInstall", function (e) {
+      e.preventDefault();
+      instalarApp();
+    });
+    onClick("btnCerrarInstall", function () {
+      ocultarBannerInstalacion();
+      guardarLS(STORAGE.installCerrado, "si");
+    });
   }
 
-  console.log("%cFestivos", "font-size: 28px; font-weight: bold; color: #3B82F6;");
-  console.log("%cCalendario de días festivos", "font-size: 14px; color: #666;");
-  console.log("%chttps://github.com/siestaa42002-code/festivos-colombia-2026", "font-size: 12px; color: #999;");
-}
+  function instalarApp() {
+    if (esIOS()) {
+      mostrarToast("En iPhone: boton Compartir y luego Anadir a pantalla de inicio.", 5000);
+      return;
+    }
 
-if (document.readyState === "loading") {
-  document.addEventListener("DOMContentLoaded", init);
-} else {
-  init();
-}
+    if (!promptInstalacion) {
+      mostrarToast("Usa el menu del navegador y elige Instalar aplicacion.", 4500);
+      return;
+    }
+
+    promptInstalacion.prompt();
+    promptInstalacion.userChoice.then(function (resultado) {
+      if (resultado && resultado.outcome === "accepted") {
+        ocultarBannerInstalacion();
+      }
+      promptInstalacion = null;
+    }).catch(function () {
+      promptInstalacion = null;
+    });
+  }
+
+  // =========================================================================
+  // Init
+  // =========================================================================
+
+  function init() {
+    try {
+      setTexto("anioActual", String(HOY.getUTCFullYear()));
+      aplicarTema();
+      actualizarHoyTexto();
+      recargarFestivos();
+      actualizarProximoFestivo();
+
+      construirDropdownAnio();
+      sincronizarDropdownAnio();
+      renderCalendario();
+
+      inicializarNav();
+      inicializarFiltrosLista();
+      inicializarCalculadora();
+
+      configurarDropdown("dropdownAnio", function (valor) {
+        estado.anio = parseInt(valor, 10);
+        guardarLS(STORAGE.anio, estado.anio);
+        recargarFestivos();
+        renderCalendario();
+        renderVistaActual();
+        anunciar("Anio cambiado a " + estado.anio);
+      });
+
+      onClick("btnTema", function () {
+        estado.tema = estado.tema === "claro" ? "oscuro" : "claro";
+        guardarLS(STORAGE.tema, estado.tema);
+        aplicarTema();
+      });
+
+      onClick("btnIrHoy", irAHoy);
+
+      document.addEventListener("click", function (e) {
+        if (!e.target.closest || !e.target.closest(".dropdown")) {
+          var abiertos = document.querySelectorAll(".dropdown.open");
+          Array.prototype.forEach.call(abiertos, function (d) {
+            d.classList.remove("open");
+            var t = d.querySelector(".dropdown-toggle");
+            if (t) t.setAttribute("aria-expanded", "false");
+          });
+        }
+      });
+
+      inicializarPWA();
+
+      // Al abrir, situarse en el mes actual
+      setTimeout(desplazarAlMesActual, 450);
+
+      console.log("%cFestivos", "font-size: 26px; font-weight: bold; color: #3B82F6;");
+      console.log("%chttps://github.com/siestaa42002-code/festivos-colombia-2026", "font-size: 12px; color: #999;");
+    } catch (err) {
+      console.error("Error al iniciar Festivos:", err);
+      mostrarToast("Hubo un error al cargar. Recarga la pagina.", 5000);
+    }
+  }
+
+  if (document.readyState === "loading") {
+    document.addEventListener("DOMContentLoaded", init);
+  } else {
+    init();
+  }
+})();
