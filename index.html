@@ -358,18 +358,58 @@
         </div>
 
         <div class="campo">
-          <label for="eventoFecha" class="cintillo-mini">Fecha</label>
-          <input type="date" id="eventoFecha" class="input-fecha" />
-        </div>
-
-        <div class="campo">
           <span class="cintillo-mini">Categoría</span>
           <div id="selectorCategoria" class="selector-categoria"></div>
         </div>
 
+        <label class="campo-check">
+          <input type="checkbox" id="eventoTodoElDia" checked />
+          <span>Todo el día</span>
+        </label>
+
+        <div class="campo-fila">
+          <div class="campo">
+            <label for="eventoFecha" class="cintillo-mini">Empieza</label>
+            <input type="date" id="eventoFecha" class="input-fecha" />
+          </div>
+          <div class="campo campo-hora hidden" id="campoHoraInicio">
+            <label for="eventoHora" class="cintillo-mini">Hora</label>
+            <input type="time" id="eventoHora" class="input-fecha" step="300" />
+          </div>
+        </div>
+
+        <label class="campo-check">
+          <input type="checkbox" id="eventoVariosDias" />
+          <span>Dura varios días</span>
+        </label>
+
+        <div class="campo-fila hidden" id="campoFin">
+          <div class="campo">
+            <label for="eventoFechaFin" class="cintillo-mini">Termina</label>
+            <input type="date" id="eventoFechaFin" class="input-fecha" />
+          </div>
+          <div class="campo campo-hora hidden" id="campoHoraFin">
+            <label for="eventoHoraFin" class="cintillo-mini">Hora</label>
+            <input type="time" id="eventoHoraFin" class="input-fecha" step="300" />
+          </div>
+        </div>
+
+        <p class="resumen-duracion" id="resumenDuracion"></p>
+
         <div class="campo">
-          <label for="eventoRecordar" class="cintillo-mini">Recordatorio</label>
-          <select id="eventoRecordar" class="input-texto"></select>
+          <div class="campo-cabecera">
+            <span class="cintillo-mini">Recordatorio</span>
+            <label class="interruptor">
+              <input type="checkbox" id="eventoRecordarActivo" />
+              <span class="interruptor-pista"><span class="interruptor-bola"></span></span>
+            </label>
+          </div>
+
+          <div id="bloqueRecordatorio" class="bloque-recordatorio hidden">
+            <div class="atajos-recordatorio" id="atajosRecordatorio"></div>
+            <div class="ruedas" id="ruedasRecordatorio"></div>
+            <p class="recordatorio-resumen" id="recordatorioResumen">A la hora del evento</p>
+          </div>
         </div>
 
         <label class="campo-check">

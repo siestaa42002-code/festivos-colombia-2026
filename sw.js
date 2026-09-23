@@ -1,4 +1,4 @@
-const CACHE_NAME = "festivos-v7";
+const CACHE_NAME = "festivos-v8";
 const ARCHIVOS = [
   "./",
   "./index.html",

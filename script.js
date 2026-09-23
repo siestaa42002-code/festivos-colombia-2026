@@ -154,9 +154,16 @@
 
     var mapaEventos = {};
     estado.eventos.forEach(function (e) {
-      var k = claveFecha(e.fechaObj);
-      if (!mapaEventos[k]) mapaEventos[k] = [];
-      mapaEventos[k].push(e);
+      Eventos.diasDelEvento(e).forEach(function (dia, indice) {
+        var k = claveFecha(dia);
+        if (!mapaEventos[k]) mapaEventos[k] = [];
+        mapaEventos[k].push({
+          evento: e,
+          esInicio: indice === 0,
+          esFin: indice === (e.duracionDias || 0),
+          enMedio: indice > 0 && indice < (e.duracionDias || 0)
+        });
+      });
     });
 
     var claveHoy = claveFecha(HOY);
@@ -179,7 +186,9 @@
         return f.fecha.getUTCMonth() === mesRef;
       });
       var eventosMes = estado.eventos.filter(function (e) {
-        return e.fechaObj.getUTCMonth() === mesRef;
+        return Eventos.diasDelEvento(e).some(function (d) {
+          return d.getUTCMonth() === mesRef && d.getUTCFullYear() === estado.anio;
+        });
       });
 
       var partes = [];
@@ -233,7 +242,7 @@
     var fecha = crearFecha(anio, mes, dia);
     var clave = claveFecha(fecha);
     var festivo = mapaFestivos[clave];
-    var eventos = mapaEventos[clave] || [];
+    var entradas = mapaEventos[clave] || [];
 
     var el = document.createElement("button");
     el.type = "button";
@@ -243,31 +252,43 @@
     if (esFinDeSemana(fecha)) el.classList.add("finde");
     if (clave === claveHoy) el.classList.add("hoy");
     if (festivo) el.classList.add("festivo");
-    if (eventos.length) el.classList.add("con-evento");
 
-    // Marcas de color por evento
-    if (eventos.length) {
+    if (entradas.length) {
+      el.classList.add("con-evento");
+
+      // Pintar la continuidad del rango. Un festivo dentro del rango
+      // conserva su azul sólido, pero mantiene los bordes alineados.
+      var hayRango = entradas.some(function (x) { return x.evento.esRango; });
+      if (hayRango) {
+        el.classList.add("en-rango");
+        var soloInicio = entradas.every(function (x) { return !x.evento.esRango || x.esInicio; });
+        var soloFin = entradas.every(function (x) { return !x.evento.esRango || x.esFin; });
+        var enMedio = entradas.some(function (x) { return x.enMedio; });
+        if (enMedio) el.classList.add("rango-medio");
+        else if (soloInicio) el.classList.add("rango-inicio");
+        else if (soloFin) el.classList.add("rango-fin");
+      }
+
       var marcas = document.createElement("span");
       marcas.className = "dia-marcas";
-      eventos.slice(0, 3).forEach(function (ev) {
+      entradas.slice(0, 3).forEach(function (x) {
         var punto = document.createElement("span");
         punto.className = "dia-marca";
-        var cat = Eventos.CATEGORIAS[ev.categoria] || Eventos.CATEGORIAS.otro;
+        var cat = Eventos.CATEGORIAS[x.evento.categoria] || Eventos.CATEGORIAS.otro;
         punto.style.background = cat.color;
         marcas.appendChild(punto);
       });
       el.appendChild(marcas);
     }
 
-    // Etiqueta accesible
     var etiquetas = [formatearFechaLarga(fecha)];
     if (festivo) etiquetas.push(festivo.nombre);
-    eventos.forEach(function (ev) { etiquetas.push(ev.titulo); });
+    entradas.forEach(function (x) { etiquetas.push(x.evento.titulo); });
     el.setAttribute("aria-label", etiquetas.join(", "));
     if (festivo) el.title = festivo.nombre;
 
     el.addEventListener("click", function () {
-      abrirModalDia(fecha, festivo, eventos);
+      abrirModalDia(fecha, festivo, entradas.map(function (x) { return x.evento; }));
     });
 
     return el;
@@ -359,7 +380,11 @@
         item.appendChild(punto);
 
         var texto = document.createElement("span");
-        texto.textContent = ev.titulo + (ev.edad ? " (" + ev.edad + ")" : "");
+        var t = ev.titulo;
+        if (ev.edad) t += " (" + ev.edad + ")";
+        if (!ev.todoElDia && ev.hora) t += " · " + ev.hora;
+        else if (ev.esRango) t += " · " + (ev.duracionDias + 1) + " días";
+        texto.textContent = t;
         item.appendChild(texto);
 
         item.addEventListener("click", function () {
@@ -382,6 +407,217 @@
   function cerrarModalDia() {
     ocultar("modalDia");
     estado.fechaModalDia = null;
+  }
+
+  // =========================================================================
+  // Componente de rueda (selector tipo picker)
+  // =========================================================================
+
+  var ALTURA_ITEM = 38;
+
+  function crearRueda(unidad, valorInicial, alCambiar) {
+    var rueda = document.createElement("div");
+    rueda.className = "rueda";
+    rueda.setAttribute("data-unidad", unidad.clave);
+
+    var label = document.createElement("div");
+    label.className = "rueda-label";
+    label.textContent = unidad.etiqueta;
+    rueda.appendChild(label);
+
+    var scroll = document.createElement("div");
+    scroll.className = "rueda-scroll";
+    scroll.setAttribute("role", "listbox");
+    scroll.setAttribute("aria-label", unidad.etiqueta);
+    scroll.setAttribute("tabindex", "0");
+
+    var valores = [];
+    for (var v = 0; v <= unidad.max; v += unidad.paso) valores.push(v);
+
+    valores.forEach(function (valor, i) {
+      var item = document.createElement("div");
+      item.className = "rueda-item";
+      item.textContent = String(valor);
+      item.setAttribute("data-valor", String(valor));
+      item.setAttribute("data-indice", String(i));
+      item.setAttribute("role", "option");
+      item.addEventListener("click", function () {
+        irAIndice(i, true);
+      });
+      scroll.appendChild(item);
+    });
+
+    rueda.appendChild(scroll);
+
+    var indiceActual = Math.max(0, valores.indexOf(valorInicial));
+    var temporizador = null;
+    var ignorarScroll = false;
+
+    function pintar(indice) {
+      var items = scroll.querySelectorAll(".rueda-item");
+      Array.prototype.forEach.call(items, function (it, i) {
+        it.classList.toggle("seleccionado", i === indice);
+        it.classList.toggle("adyacente", Math.abs(i - indice) === 1);
+        it.setAttribute("aria-selected", i === indice ? "true" : "false");
+      });
+    }
+
+    function irAIndice(indice, suave) {
+      indice = Math.max(0, Math.min(valores.length - 1, indice));
+      indiceActual = indice;
+      ignorarScroll = true;
+      try {
+        scroll.scrollTo({ top: indice * ALTURA_ITEM, behavior: suave ? "smooth" : "auto" });
+      } catch (e) {
+        scroll.scrollTop = indice * ALTURA_ITEM;
+      }
+      pintar(indice);
+      setTimeout(function () { ignorarScroll = false; }, suave ? 320 : 40);
+      if (alCambiar) alCambiar(valores[indice]);
+    }
+
+    scroll.addEventListener("scroll", function () {
+      if (ignorarScroll) return;
+      var indice = Math.round(scroll.scrollTop / ALTURA_ITEM);
+      indice = Math.max(0, Math.min(valores.length - 1, indice));
+      if (indice !== indiceActual) {
+        indiceActual = indice;
+        pintar(indice);
+      }
+      clearTimeout(temporizador);
+      temporizador = setTimeout(function () {
+        if (alCambiar) alCambiar(valores[indiceActual]);
+      }, 110);
+    });
+
+    scroll.addEventListener("keydown", function (e) {
+      if (e.key === "ArrowDown") {
+        e.preventDefault();
+        irAIndice(indiceActual + 1, true);
+      } else if (e.key === "ArrowUp") {
+        e.preventDefault();
+        irAIndice(indiceActual - 1, true);
+      } else if (e.key === "Home") {
+        e.preventDefault();
+        irAIndice(0, true);
+      } else if (e.key === "End") {
+        e.preventDefault();
+        irAIndice(valores.length - 1, true);
+      }
+    });
+
+    // API de la rueda
+    rueda.api = {
+      valor: function () { return valores[indiceActual]; },
+      fijar: function (valor, suave) {
+        var i = valores.indexOf(valor);
+        if (i === -1) {
+          // Buscar el más cercano
+          var mejor = 0, dif = Infinity;
+          valores.forEach(function (v, k) {
+            var d = Math.abs(v - valor);
+            if (d < dif) { dif = d; mejor = k; }
+          });
+          i = mejor;
+        }
+        irAIndice(i, suave === true);
+      },
+      refrescar: function () {
+        ignorarScroll = true;
+        scroll.scrollTop = indiceActual * ALTURA_ITEM;
+        pintar(indiceActual);
+        setTimeout(function () { ignorarScroll = false; }, 40);
+      }
+    };
+
+    pintar(indiceActual);
+    return rueda;
+  }
+
+  var ruedas = {};
+
+  function construirRuedas() {
+    var cont = $("ruedasRecordatorio");
+    if (!cont) return;
+    limpiar(cont);
+    ruedas = {};
+
+    Eventos.UNIDADES.forEach(function (unidad) {
+      var rueda = crearRueda(unidad, 0, function () {
+        actualizarResumenRecordatorio();
+        marcarAtajoCoincidente();
+      });
+      ruedas[unidad.clave] = rueda;
+      cont.appendChild(rueda);
+    });
+  }
+
+  function leerRuedas() {
+    var r = { activo: true };
+    Eventos.UNIDADES.forEach(function (u) {
+      r[u.clave] = ruedas[u.clave] ? ruedas[u.clave].api.valor() : 0;
+    });
+    return r;
+  }
+
+  function fijarRuedas(recordatorio, suave) {
+    Eventos.UNIDADES.forEach(function (u) {
+      if (ruedas[u.clave]) ruedas[u.clave].api.fijar(recordatorio[u.clave] || 0, suave);
+    });
+    actualizarResumenRecordatorio();
+    marcarAtajoCoincidente();
+  }
+
+  function refrescarRuedas() {
+    Eventos.UNIDADES.forEach(function (u) {
+      if (ruedas[u.clave]) ruedas[u.clave].api.refrescar();
+    });
+  }
+
+  function actualizarResumenRecordatorio() {
+    var r = leerRuedas();
+    var total = Eventos.recordatorioEnMinutos(r);
+    var el = $("recordatorioResumen");
+    if (!el) return;
+
+    if (total === 0) {
+      el.textContent = "Justo a la hora del evento";
+      return;
+    }
+    el.textContent = "Aviso " + Eventos.textoRecordatorio(r);
+  }
+
+  function construirAtajos() {
+    var cont = $("atajosRecordatorio");
+    if (!cont) return;
+    limpiar(cont);
+
+    Eventos.ATAJOS.forEach(function (atajo, i) {
+      if (!atajo.valor) return; // "Sin aviso" se maneja con el interruptor
+      var btn = document.createElement("button");
+      btn.type = "button";
+      btn.className = "atajo-btn";
+      btn.textContent = atajo.texto;
+      btn.setAttribute("data-atajo", String(i));
+      btn.addEventListener("click", function () {
+        fijarRuedas(atajo.valor, true);
+      });
+      cont.appendChild(btn);
+    });
+  }
+
+  function marcarAtajoCoincidente() {
+    var actual = leerRuedas();
+    var botones = document.querySelectorAll(".atajo-btn");
+    Array.prototype.forEach.call(botones, function (btn) {
+      var i = parseInt(btn.getAttribute("data-atajo"), 10);
+      var atajo = Eventos.ATAJOS[i];
+      if (!atajo || !atajo.valor) { btn.classList.remove("activo"); return; }
+      var coincide = Eventos.UNIDADES.every(function (u) {
+        return (atajo.valor[u.clave] || 0) === (actual[u.clave] || 0);
+      });
+      btn.classList.toggle("activo", coincide);
+    });
   }
 
   // =========================================================================
@@ -432,32 +668,26 @@
     });
   }
 
-  function construirSelectorRecordatorio() {
-    var sel = $("eventoRecordar");
-    if (!sel) return;
-    limpiar(sel);
-    Eventos.OPCIONES_RECORDATORIO.forEach(function (op) {
-      var o = document.createElement("option");
-      o.value = String(op.valor);
-      o.textContent = op.texto;
-      sel.appendChild(o);
-    });
-  }
 
   function abrirModalEvento(id, fechaPredeterminada) {
     estado.editandoId = id || null;
-
     var esEdicion = !!id;
+
     setTexto("modalTitulo", esEdicion ? "Editar evento" : "Nuevo evento");
 
     var btnBorrar = $("btnBorrarEvento");
     if (btnBorrar) btnBorrar.classList.toggle("hidden", !esEdicion);
 
-    var inputTitulo = $("eventoTitulo");
-    var inputFecha = $("eventoFecha");
-    var inputNota = $("eventoNota");
-    var inputAnual = $("eventoAnual");
-    var selRecordar = $("eventoRecordar");
+    var elTitulo = $("eventoTitulo");
+    var elFecha = $("eventoFecha");
+    var elFechaFin = $("eventoFechaFin");
+    var elHora = $("eventoHora");
+    var elHoraFin = $("eventoHoraFin");
+    var elTodoElDia = $("eventoTodoElDia");
+    var elVariosDias = $("eventoVariosDias");
+    var elAnual = $("eventoAnual");
+    var elNota = $("eventoNota");
+    var elRecordarActivo = $("eventoRecordarActivo");
 
     if (esEdicion) {
       var ev = Eventos.obtener(id);
@@ -465,25 +695,107 @@
         mostrarToast("No se encontró ese evento.");
         return;
       }
-      if (inputTitulo) inputTitulo.value = ev.titulo;
-      if (inputFecha) inputFecha.value = ev.fecha;
-      if (inputNota) inputNota.value = ev.nota || "";
-      if (inputAnual) inputAnual.checked = ev.anual === true;
-      if (selRecordar) selRecordar.value = String(ev.recordar);
+      if (elTitulo) elTitulo.value = ev.titulo;
+      if (elFecha) elFecha.value = ev.fecha;
+      if (elFechaFin) elFechaFin.value = ev.fechaFin || ev.fecha;
+      if (elHora) elHora.value = ev.hora || "09:00";
+      if (elHoraFin) elHoraFin.value = ev.horaFin || "";
+      if (elTodoElDia) elTodoElDia.checked = ev.todoElDia !== false;
+      if (elVariosDias) elVariosDias.checked = !!(ev.fechaFin && ev.fechaFin !== ev.fecha);
+      if (elAnual) elAnual.checked = ev.anual === true;
+      if (elNota) elNota.value = ev.nota || "";
+
+      var r = Eventos.normalizarRecordatorio(ev.recordatorio);
+      if (elRecordarActivo) elRecordarActivo.checked = r.activo;
+      fijarRuedas(r, false);
       seleccionarCategoria(ev.categoria);
     } else {
-      if (inputTitulo) inputTitulo.value = "";
-      if (inputFecha) inputFecha.value = fechaPredeterminada ? claveFecha(fechaPredeterminada) : claveFecha(HOY);
-      if (inputNota) inputNota.value = "";
-      if (inputAnual) inputAnual.checked = false;
-      if (selRecordar) selRecordar.value = "1";
+      var base = fechaPredeterminada ? claveFecha(fechaPredeterminada) : claveFecha(HOY);
+      if (elTitulo) elTitulo.value = "";
+      if (elFecha) elFecha.value = base;
+      if (elFechaFin) elFechaFin.value = base;
+      if (elHora) elHora.value = "09:00";
+      if (elHoraFin) elHoraFin.value = "";
+      if (elTodoElDia) elTodoElDia.checked = true;
+      if (elVariosDias) elVariosDias.checked = false;
+      if (elAnual) elAnual.checked = false;
+      if (elNota) elNota.value = "";
+      if (elRecordarActivo) elRecordarActivo.checked = true;
+      fijarRuedas({ meses: 0, semanas: 0, dias: 1, horas: 0, minutos: 0 }, false);
       seleccionarCategoria("personal");
     }
 
+    sincronizarCamposHora();
+    sincronizarCamposRango();
+    sincronizarBloqueRecordatorio();
+    actualizarResumenDuracion();
+
     mostrar("modalEvento");
+
     setTimeout(function () {
-      if (inputTitulo) inputTitulo.focus();
-    }, 120);
+      refrescarRuedas();
+      if (elTitulo && !esEdicion) elTitulo.focus();
+    }, 150);
+  }
+
+  function sincronizarCamposHora() {
+    var todoElDia = ($("eventoTodoElDia") || {}).checked !== false;
+    var ci = $("campoHoraInicio");
+    var cf = $("campoHoraFin");
+    if (ci) ci.classList.toggle("hidden", todoElDia);
+    if (cf) {
+      var variosDias = ($("eventoVariosDias") || {}).checked === true;
+      cf.classList.toggle("hidden", todoElDia || !variosDias);
+    }
+  }
+
+  function sincronizarCamposRango() {
+    var variosDias = ($("eventoVariosDias") || {}).checked === true;
+    var cf = $("campoFin");
+    if (cf) cf.classList.toggle("hidden", !variosDias);
+
+    if (variosDias) {
+      var elFecha = $("eventoFecha");
+      var elFechaFin = $("eventoFechaFin");
+      if (elFecha && elFechaFin) {
+        elFechaFin.setAttribute("min", elFecha.value);
+        if (!elFechaFin.value || elFechaFin.value < elFecha.value) {
+          elFechaFin.value = elFecha.value;
+        }
+      }
+    }
+    sincronizarCamposHora();
+  }
+
+  function sincronizarBloqueRecordatorio() {
+    var activo = ($("eventoRecordarActivo") || {}).checked === true;
+    var bloque = $("bloqueRecordatorio");
+    if (bloque) {
+      bloque.classList.toggle("hidden", !activo);
+      if (activo) setTimeout(refrescarRuedas, 60);
+    }
+  }
+
+  function actualizarResumenDuracion() {
+    var el = $("resumenDuracion");
+    if (!el) return;
+
+    var variosDias = ($("eventoVariosDias") || {}).checked === true;
+    if (!variosDias) { el.textContent = ""; return; }
+
+    var ini = parseInputDate(($("eventoFecha") || {}).value);
+    var fin = parseInputDate(($("eventoFechaFin") || {}).value);
+    if (!ini || !fin) { el.textContent = ""; return; }
+
+    if (fin < ini) {
+      el.textContent = "La fecha final debe ser posterior a la inicial.";
+      return;
+    }
+
+    var dias = Math.round((fin - ini) / 86400000) + 1;
+    el.textContent = dias === 1
+      ? "Un solo día"
+      : "Dura " + dias + " días, del " + formatearCorto(ini) + " al " + formatearCorto(fin);
   }
 
   function cerrarModalEvento() {
@@ -492,29 +804,52 @@
   }
 
   function guardarEventoDesdeModal() {
-    var titulo = ($("eventoTitulo") || {}).value || "";
+    var titulo = (($("eventoTitulo") || {}).value || "").trim();
     var fecha = ($("eventoFecha") || {}).value || "";
+    var todoElDia = ($("eventoTodoElDia") || {}).checked !== false;
+    var variosDias = ($("eventoVariosDias") || {}).checked === true;
+    var fechaFin = variosDias ? (($("eventoFechaFin") || {}).value || fecha) : fecha;
+    var hora = todoElDia ? "" : (($("eventoHora") || {}).value || "");
+    var horaFin = (todoElDia || !variosDias) ? "" : (($("eventoHoraFin") || {}).value || "");
     var nota = ($("eventoNota") || {}).value || "";
     var anual = ($("eventoAnual") || {}).checked === true;
-    var recordar = parseInt((($("eventoRecordar") || {}).value || "-1"), 10);
+    var recordarActivo = ($("eventoRecordarActivo") || {}).checked === true;
 
-    if (!titulo.trim()) {
+    if (!titulo) {
       mostrarToast("Ponle un título al evento.");
       var it = $("eventoTitulo");
       if (it) it.focus();
       return;
     }
-    if (!/^\d{4}-\d{2}-\d{2}$/.test(fecha)) {
+    if (!Eventos.esFechaValida(fecha)) {
       mostrarToast("Elige una fecha válida.");
       return;
+    }
+    if (variosDias && fechaFin < fecha) {
+      mostrarToast("La fecha final debe ser posterior a la inicial.");
+      return;
+    }
+    if (!todoElDia && !Eventos.esHoraValida(hora)) {
+      mostrarToast("Elige una hora válida o marca Todo el día.");
+      return;
+    }
+
+    var recordatorio = Eventos.recordatorioVacio();
+    if (recordarActivo) {
+      recordatorio = leerRuedas();
+      recordatorio.activo = true;
     }
 
     var datos = {
       titulo: titulo,
       fecha: fecha,
+      fechaFin: fechaFin,
+      todoElDia: todoElDia,
+      hora: hora,
+      horaFin: horaFin,
       nota: nota,
       categoria: estado.categoriaSel,
-      recordar: recordar,
+      recordatorio: recordatorio,
       anual: anual
     };
 
@@ -524,14 +859,14 @@
     } else {
       Eventos.crear(datos);
       mostrarToast("Evento guardado.");
-      // Ofrecer permiso de notificaciones si tiene recordatorio
-      if (recordar >= 0) proponerNotificaciones();
+      if (recordarActivo) proponerNotificaciones();
     }
 
     cerrarModalEvento();
     recargarDatos();
     renderCalendario();
     renderVistaActual();
+    revisarRecordatorios();
   }
 
   function borrarEventoActual() {
@@ -646,7 +981,9 @@
     var card = document.createElement("button");
     card.type = "button";
     card.className = "evento-card";
-    if (e.fechaObj < HOY) card.classList.add("pasado");
+
+    var finVigencia = e.fechaFinObj || e.fechaObj;
+    if (finVigencia < HOY) card.classList.add("pasado");
 
     var cat = Eventos.CATEGORIAS[e.categoria] || Eventos.CATEGORIAS.otro;
 
@@ -678,9 +1015,23 @@
     var meta = document.createElement("div");
     meta.className = "evento-meta";
 
-    var diaSem = document.createElement("span");
-    diaSem.textContent = DIAS_SEMANA[e.fechaObj.getUTCDay()];
-    meta.appendChild(diaSem);
+    if (e.esRango) {
+      var tagRango = document.createElement("span");
+      tagRango.className = "tag";
+      tagRango.textContent = (e.duracionDias + 1) + " días, hasta el " + formatearCorto(e.fechaFinObj);
+      meta.appendChild(tagRango);
+    } else {
+      var diaSem = document.createElement("span");
+      diaSem.textContent = DIAS_SEMANA[e.fechaObj.getUTCDay()];
+      meta.appendChild(diaSem);
+    }
+
+    if (!e.todoElDia && e.hora) {
+      var tagHora = document.createElement("span");
+      tagHora.className = "tag";
+      tagHora.textContent = e.horaFin ? e.hora + " a " + e.horaFin : e.hora;
+      meta.appendChild(tagHora);
+    }
 
     var tagCat = document.createElement("span");
     tagCat.className = "tag-categoria";
@@ -696,17 +1047,12 @@
       meta.appendChild(tagAnual);
     }
 
-    if (typeof e.recordar === "number" && e.recordar >= 0) {
-      var op = null;
-      Eventos.OPCIONES_RECORDATORIO.forEach(function (o) {
-        if (o.valor === e.recordar) op = o;
-      });
-      if (op) {
-        var tagRec = document.createElement("span");
-        tagRec.className = "tag";
-        tagRec.textContent = op.valor === 0 ? "aviso ese día" : "aviso " + op.texto.toLowerCase();
-        meta.appendChild(tagRec);
-      }
+    if (e.recordatorio && e.recordatorio.activo) {
+      var tagRec = document.createElement("span");
+      tagRec.className = "tag puente";
+      var texto = Eventos.textoRecordatorio(e.recordatorio);
+      tagRec.textContent = texto === "a la hora" ? "aviso a la hora" : "aviso " + texto;
+      meta.appendChild(tagRec);
     }
 
     info.appendChild(meta);
@@ -973,14 +1319,18 @@
   function renderAjustes() {
     actualizarEstadoNotificaciones();
 
-    var total = Eventos.cargar().length;
-    var anuales = Eventos.cargar().filter(function (e) { return e.anual; }).length;
-    var conAviso = Eventos.cargar().filter(function (e) { return e.recordar >= 0; }).length;
+    var todos = Eventos.cargar();
+    var total = todos.length;
+    var anuales = todos.filter(function (e) { return e.anual; }).length;
+    var conAviso = todos.filter(function (e) { return e.recordatorio && e.recordatorio.activo; }).length;
+    var rangos = todos.filter(function (e) { return e.fechaFin && e.fechaFin !== e.fecha; }).length;
 
-    setTexto("statsApp",
-      total + (total === 1 ? " evento guardado" : " eventos guardados") +
-      ", " + anuales + " que se repiten cada año y " +
-      conAviso + (conAviso === 1 ? " con recordatorio." : " con recordatorio."));
+    var partes = [total + (total === 1 ? " evento guardado" : " eventos guardados")];
+    if (anuales) partes.push(anuales + (anuales === 1 ? " se repite cada año" : " se repiten cada año"));
+    if (rangos) partes.push(rangos + (rangos === 1 ? " dura varios días" : " duran varios días"));
+    if (conAviso) partes.push(conAviso + (conAviso === 1 ? " tiene recordatorio" : " tienen recordatorio"));
+
+    setTexto("statsApp", partes.join(", ") + ".");
   }
 
   function actualizarEstadoNotificaciones() {
@@ -1064,7 +1414,10 @@
 
       var meta = document.createElement("div");
       meta.className = "aviso-card-meta";
-      meta.textContent = Eventos.textoRecordatorio(p) + " · " + formatearFechaLarga(p.evento.fechaObj);
+      var detalle = Eventos.textoCuentaAtras(p) + " · " + formatearFechaLarga(p.evento.fechaObj);
+      if (!p.evento.todoElDia && p.evento.hora) detalle += " a las " + p.evento.hora;
+      if (p.evento.esRango) detalle += " (" + (p.evento.duracionDias + 1) + " días)";
+      meta.textContent = detalle;
       info.appendChild(meta);
 
       card.appendChild(info);
@@ -1084,7 +1437,7 @@
 
       // Notificación del sistema
       if (Eventos.permisoNotificaciones() === "granted") {
-        Eventos.notificar(p.evento.titulo, Eventos.textoRecordatorio(p));
+        Eventos.notificar(p.evento.titulo, Eventos.textoCuentaAtras(p));
       }
     });
 
@@ -1224,56 +1577,14 @@
   }
 
   function exportarIcsTodo() {
-    var entradas = [];
-
-    estado.festivos.forEach(function (f, i) {
-      entradas.push({
-        uid: "festivo-" + estado.anio + "-" + i + "@siestaa42002-code",
-        fecha: f.fecha,
-        titulo: f.nombre,
-        descripcion: "Festivo nacional de Colombia."
-      });
-    });
-
-    Eventos.delAnio(estado.anio).forEach(function (e) {
-      entradas.push({
-        uid: e.id + "@siestaa42002-code",
-        fecha: e.fechaObj,
-        titulo: e.titulo,
-        descripcion: e.nota,
-        anual: e.anual,
-        recordar: e.recordar
-      });
-    });
-
-    if (entradas.length === 0) {
+    var eventos = Eventos.delAnio(estado.anio);
+    if (estado.festivos.length === 0 && eventos.length === 0) {
       mostrarToast("No hay nada que exportar.");
       return;
     }
-
-    entradas.sort(function (a, b) { return a.fecha - b.fecha; });
-
-    // Reusar el constructor a través de icsDeEventos no sirve aquí,
-    // así que armamos con la API pública de festivos y eventos combinada
-    var ics = construirIcsMixto(entradas);
+    var ics = Eventos.icsMixto(estado.festivos, eventos, estado.anio);
     var ok = Eventos.descargar(ics, "calendario-" + estado.anio + ".ics", "text/calendar");
     mostrarToast(ok ? "Archivo descargado con festivos y eventos." : "No se pudo descargar.", 4000);
-  }
-
-  function construirIcsMixto(entradas) {
-    // Aprovecha icsDeEventos transformando las entradas al formato que espera
-    var comoEventos = entradas.map(function (en) {
-      return {
-        id: en.uid.split("@")[0],
-        fechaObj: en.fecha,
-        fecha: claveFecha(en.fecha),
-        titulo: en.titulo,
-        nota: en.descripcion,
-        anual: en.anual === true,
-        recordar: typeof en.recordar === "number" ? en.recordar : -1
-      };
-    });
-    return Eventos.icsDeEventos(comoEventos);
   }
 
   function compartirAnio() {
@@ -1621,7 +1932,8 @@
       construirDropdownAnio();
       sincronizarDropdownAnio();
       construirSelectorCategoria();
-      construirSelectorRecordatorio();
+      construirRuedas();
+      construirAtajos();
       seleccionarCategoria("personal");
 
       renderCalendario();
@@ -1659,6 +1971,28 @@
       onClick("btnCancelarEvento", cerrarModalEvento);
       onClick("btnCerrarModal", cerrarModalEvento);
       onClick("btnBorrarEvento", borrarEventoActual);
+
+      // Controles del modal de evento
+      var chkTodoElDia = $("eventoTodoElDia");
+      if (chkTodoElDia) chkTodoElDia.addEventListener("change", sincronizarCamposHora);
+
+      var chkVariosDias = $("eventoVariosDias");
+      if (chkVariosDias) chkVariosDias.addEventListener("change", function () {
+        sincronizarCamposRango();
+        actualizarResumenDuracion();
+      });
+
+      var chkRecordar = $("eventoRecordarActivo");
+      if (chkRecordar) chkRecordar.addEventListener("change", sincronizarBloqueRecordatorio);
+
+      var inFecha = $("eventoFecha");
+      if (inFecha) inFecha.addEventListener("change", function () {
+        sincronizarCamposRango();
+        actualizarResumenDuracion();
+      });
+
+      var inFechaFin = $("eventoFechaFin");
+      if (inFechaFin) inFechaFin.addEventListener("change", actualizarResumenDuracion);
 
       onClick("btnCerrarModalDia", cerrarModalDia);
       onClick("btnAnadirEnDia", function () {

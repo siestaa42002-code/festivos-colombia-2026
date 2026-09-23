@@ -8,7 +8,7 @@ Calendario de días festivos con eventos personales y recordatorios. Instalable 
 
 **Agenda** — festivos y eventos próximos mezclados y en orden, para ver de un vistazo lo que viene.
 
-**Mis eventos** — cumpleaños, pagos, citas y lo que quieras recordar. Siete categorías con color, opción de repetir cada año y recordatorio configurable.
+**Mis eventos** — cumpleaños, pagos, citas, viajes y lo que quieras recordar. Siete categorías con color, eventos de un día o de varios, con hora o de jornada completa, opción de repetir cada año y recordatorio al detalle.
 
 **Puentes** — festivos que caen lunes o viernes.
 
@@ -35,9 +35,23 @@ Calendario de días festivos con eventos personales y recordatorios. Instalable 
 - PWA instalable en Android e iOS. Funciona sin conexión.
 - Todo se guarda solo en tu dispositivo. No hay servidor ni cuentas.
 
+## Eventos de varios días y con hora
+
+Un evento puede durar un solo día o extenderse por un rango. En el calendario el rango se pinta como una banda continua, y si un festivo cae dentro conserva su color pero mantiene la continuidad.
+
+Marcando "Todo el día" el evento ocupa la jornada completa. Si lo desmarcas puedes poner hora de inicio y, en los eventos de varios días, también hora de fin.
+
+## Recordatorios al detalle
+
+El recordatorio se arma con cinco ruedas: meses, semanas, días, horas y minutos. Se combinan entre sí, así que puedes pedir un aviso "1 semana y 3 días antes" o "2 horas y 30 minutos antes". Hay atajos para los casos más comunes.
+
+El cálculo tiene precisión de minutos y usa la hora de Bogotá. Un evento a las 09:00 con aviso de 2 horas avisa a las 07:00, no antes.
+
+Al exportar a tu calendario, los recordatorios se convierten en alarmas nativas con la duración exacta.
+
 ## Eventos que se repiten
 
-Un evento marcado como anual se proyecta a cualquier año que consultes. Si pones un cumpleaños con la fecha de nacimiento, la app calcula la edad automáticamente. Los eventos del 29 de febrero se muestran el 28 en los años no bisiestos.
+Un evento marcado como anual se proyecta a cualquier año que consultes. Si pones un cumpleaños con la fecha de nacimiento, la app calcula la edad automáticamente. Los eventos del 29 de febrero se muestran el 28 en los años no bisiestos, y lo mismo ocurre con el 31 en meses de 30 días.
 
 ## Instalar en el teléfono
 

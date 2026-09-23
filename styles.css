@@ -2008,3 +2008,315 @@ select.input-texto {
     gap: 0.85rem;
   }
 }
+
+/* ==========================================================================
+   Campos de rango y hora
+   ========================================================================== */
+
+.campo-fila {
+  display: flex;
+  gap: 0.75rem;
+  align-items: flex-end;
+}
+
+.campo-fila .campo {
+  flex: 1;
+  margin-bottom: 1.25rem;
+}
+
+.campo-hora {
+  flex: 0 0 130px !important;
+}
+
+.campo-cabecera {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  margin-bottom: 0.6rem;
+}
+
+.resumen-duracion {
+  font-size: 0.85rem;
+  color: var(--azul-texto);
+  font-weight: 500;
+  margin-top: -0.6rem;
+  margin-bottom: 1.25rem;
+  min-height: 1.2rem;
+}
+
+/* Interruptor */
+
+.interruptor {
+  position: relative;
+  display: inline-flex;
+  cursor: pointer;
+  flex-shrink: 0;
+}
+
+.interruptor input {
+  position: absolute;
+  opacity: 0;
+  width: 0;
+  height: 0;
+}
+
+.interruptor-pista {
+  width: 46px;
+  height: 27px;
+  border-radius: 999px;
+  background: var(--borde-fuerte);
+  display: inline-flex;
+  align-items: center;
+  padding: 3px;
+  transition: background 0.2s ease;
+}
+
+.interruptor-bola {
+  width: 21px;
+  height: 21px;
+  border-radius: 50%;
+  background: #FFFFFF;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.2);
+  transition: transform 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.interruptor input:checked + .interruptor-pista {
+  background: var(--azul);
+}
+
+.interruptor input:checked + .interruptor-pista .interruptor-bola {
+  transform: translateX(19px);
+}
+
+.interruptor input:focus-visible + .interruptor-pista {
+  outline: 2px solid var(--azul);
+  outline-offset: 2px;
+}
+
+/* ==========================================================================
+   Recordatorio con ruedas
+   ========================================================================== */
+
+.bloque-recordatorio {
+  background: var(--bg-sutil);
+  border: 1px solid var(--borde);
+  border-radius: 14px;
+  padding: 1rem;
+}
+
+.atajos-recordatorio {
+  display: flex;
+  gap: 0.35rem;
+  flex-wrap: wrap;
+  margin-bottom: 1rem;
+}
+
+.atajo-btn {
+  background: var(--surface);
+  border: 1px solid var(--borde);
+  border-radius: 999px;
+  padding: 0.35rem 0.75rem;
+  font-family: var(--geist);
+  font-size: 0.78rem;
+  font-weight: 500;
+  color: var(--texto-medio);
+  cursor: pointer;
+  transition: border-color 0.15s ease, color 0.15s ease, background 0.15s ease;
+  white-space: nowrap;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.atajo-btn:hover {
+  color: var(--texto);
+  border-color: var(--borde-fuerte);
+}
+
+.atajo-btn.activo {
+  background: var(--azul);
+  border-color: var(--azul);
+  color: #FFFFFF;
+  font-weight: 600;
+}
+
+/* Contenedor de ruedas */
+
+.ruedas {
+  position: relative;
+  display: flex;
+  gap: 0.3rem;
+  justify-content: space-between;
+  background: var(--surface);
+  border: 1px solid var(--borde);
+  border-radius: 12px;
+  padding: 0.5rem 0.4rem 0.4rem;
+  overflow: hidden;
+}
+
+/* Banda que resalta la fila central */
+.ruedas::before {
+  content: "";
+  position: absolute;
+  left: 0.4rem;
+  right: 0.4rem;
+  top: 50%;
+  height: 38px;
+  transform: translateY(calc(-50% + 7px));
+  background: var(--azul-suave);
+  border-radius: 9px;
+  pointer-events: none;
+  z-index: 0;
+}
+
+.rueda {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  position: relative;
+  z-index: 1;
+}
+
+.rueda-label {
+  font-family: var(--geist-mono);
+  font-size: 0.58rem;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  color: var(--texto-tenue);
+  margin-bottom: 0.3rem;
+  text-align: center;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 100%;
+}
+
+.rueda-scroll {
+  height: 114px;
+  width: 100%;
+  overflow-y: scroll;
+  scroll-snap-type: y mandatory;
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+  -webkit-overflow-scrolling: touch;
+  padding: 38px 0;
+  position: relative;
+  overscroll-behavior: contain;
+}
+
+.rueda-scroll::-webkit-scrollbar {
+  display: none;
+}
+
+.rueda-item {
+  height: 38px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  scroll-snap-align: center;
+  scroll-snap-stop: always;
+  font-family: var(--geist);
+  font-size: 1rem;
+  font-weight: 500;
+  color: var(--texto-debil);
+  font-variant-numeric: tabular-nums;
+  transition: color 0.15s ease, font-weight 0.15s ease, transform 0.15s ease;
+  cursor: pointer;
+  user-select: none;
+  -webkit-user-select: none;
+}
+
+.rueda-item.seleccionado {
+  color: var(--azul-texto);
+  font-weight: 700;
+  font-size: 1.15rem;
+}
+
+.rueda-item.adyacente {
+  color: var(--texto-tenue);
+}
+
+.recordatorio-resumen {
+  margin-top: 0.85rem;
+  font-size: 0.88rem;
+  color: var(--texto);
+  font-weight: 500;
+  text-align: center;
+  min-height: 1.3rem;
+}
+
+/* ==========================================================================
+   Rangos en el calendario
+   ========================================================================== */
+
+.dia.en-rango:not(.festivo) {
+  background: var(--azul-suave);
+}
+
+.dia.rango-inicio {
+  border-top-left-radius: 8px;
+  border-bottom-left-radius: 8px;
+}
+
+.dia.rango-fin {
+  border-top-right-radius: 8px;
+  border-bottom-right-radius: 8px;
+}
+
+.dia.rango-medio {
+  border-radius: 0;
+}
+
+/* ==========================================================================
+   Responsive del modal ampliado
+   ========================================================================== */
+
+@media (max-width: 900px) {
+  .campo-fila {
+    gap: 0.6rem;
+  }
+
+  .campo-hora {
+    flex: 0 0 116px !important;
+  }
+
+  .ruedas {
+    gap: 0.2rem;
+    padding: 0.5rem 0.3rem 0.4rem;
+  }
+
+  .rueda-label {
+    font-size: 0.54rem;
+  }
+
+  .rueda-item {
+    font-size: 0.95rem;
+  }
+
+  .rueda-item.seleccionado {
+    font-size: 1.1rem;
+  }
+
+  .atajos-recordatorio {
+    overflow-x: auto;
+    flex-wrap: nowrap;
+    padding-bottom: 0.25rem;
+    scrollbar-width: none;
+  }
+
+  .atajos-recordatorio::-webkit-scrollbar {
+    display: none;
+  }
+}
+
+@media (max-width: 380px) {
+  .campo-fila {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .campo-hora {
+    flex: 1 !important;
+  }
+}
