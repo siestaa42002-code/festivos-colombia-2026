@@ -1,6 +1,6 @@
 <!DOCTYPE html>
 <!--
-  Festivos - Calendario de días festivos
+  Festivos · Calendario de días festivos y eventos personales
   Autor: siestaa42002-code
   Repositorio: https://github.com/siestaa42002-code/festivos-colombia-2026
   Licencia: MIT
@@ -9,7 +9,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
-  <meta name="description" content="Calendario interactivo de días festivos. Puentes, vacaciones óptimas y calculadora de días hábiles." />
+  <meta name="description" content="Calendario de días festivos con eventos personales, recordatorios y exportación a tu calendario." />
   <meta name="theme-color" content="#FAFAF7" />
   <meta name="author" content="siestaa42002-code" />
 
@@ -20,9 +20,14 @@
 
   <meta property="og:type" content="website" />
   <meta property="og:site_name" content="Festivos" />
-  <meta property="og:title" content="Festivos - Calendario de días festivos" />
-  <meta property="og:description" content="Puentes, vacaciones óptimas y calculadora de días hábiles." />
+  <meta property="og:title" content="Festivos · Calendario de días festivos" />
+  <meta property="og:description" content="Puentes, vacaciones óptimas, eventos personales y recordatorios." />
   <meta property="og:image" content="/og-image.svg" />
+
+  <meta name="twitter:card" content="summary_large_image" />
+  <meta name="twitter:title" content="Festivos · Calendario de días festivos" />
+  <meta name="twitter:description" content="Puentes, vacaciones óptimas, eventos personales y recordatorios." />
+  <meta name="twitter:image" content="/og-image.svg" />
 
   <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
   <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
@@ -58,25 +63,34 @@
           <span class="nav-num">01</span>
           <span class="nav-label">Calendario</span>
         </button>
-        <button class="nav-item" type="button" data-view="lista" role="tab" aria-selected="false">
+        <button class="nav-item" type="button" data-view="agenda" role="tab" aria-selected="false">
           <span class="nav-num">02</span>
-          <span class="nav-label">Lista</span>
+          <span class="nav-label">Agenda</span>
+        </button>
+        <button class="nav-item" type="button" data-view="eventos" role="tab" aria-selected="false">
+          <span class="nav-num">03</span>
+          <span class="nav-label">Mis eventos</span>
+          <span class="nav-badge hidden" id="badgeEventos">0</span>
         </button>
         <button class="nav-item" type="button" data-view="puentes" role="tab" aria-selected="false">
-          <span class="nav-num">03</span>
+          <span class="nav-num">04</span>
           <span class="nav-label">Puentes</span>
         </button>
         <button class="nav-item" type="button" data-view="vacaciones" role="tab" aria-selected="false">
-          <span class="nav-num">04</span>
+          <span class="nav-num">05</span>
           <span class="nav-label">Vacaciones</span>
         </button>
         <button class="nav-item" type="button" data-view="habiles" role="tab" aria-selected="false">
-          <span class="nav-num">05</span>
+          <span class="nav-num">06</span>
           <span class="nav-label">Hábiles</span>
         </button>
         <button class="nav-item" type="button" data-view="comparador" role="tab" aria-selected="false">
-          <span class="nav-num">06</span>
+          <span class="nav-num">07</span>
           <span class="nav-label">Comparar</span>
+        </button>
+        <button class="nav-item" type="button" data-view="ajustes" role="tab" aria-selected="false">
+          <span class="nav-num">08</span>
+          <span class="nav-label">Ajustes</span>
         </button>
       </nav>
 
@@ -95,142 +109,309 @@
     </aside>
 
     <main class="contenido">
-      <div class="proximo-dock" id="proximoDock">
-        <div class="proximo-info">
-          <span class="proximo-label">Próximo festivo</span>
-          <span class="proximo-nombre" id="proximoNombre">Cargando</span>
+      <div class="barra-superior">
+        <div class="buscador">
+          <span class="buscador-icono" aria-hidden="true">&#8981;</span>
+          <input
+            type="search"
+            id="inputBuscar"
+            class="buscador-input"
+            placeholder="Buscar festivo o evento"
+            aria-label="Buscar festivo o evento"
+            autocomplete="off" />
+          <button id="btnLimpiarBusqueda" class="buscador-limpiar hidden" type="button" aria-label="Limpiar búsqueda">&times;</button>
         </div>
-        <div class="proximo-contador">
-          <span class="contador-numero" id="contadorDias">-</span>
-          <span class="contador-label" id="contadorLabel">días</span>
-        </div>
+        <button id="btnNuevoEventoTop" class="btn-primario btn-compacto" type="button">
+          <span aria-hidden="true">+</span> Evento
+        </button>
       </div>
 
-      <section class="hero">
-        <p class="cintillo">
-          <span class="cursor-punto" aria-hidden="true"></span>
-          <span id="hoyTexto">Hoy</span>
-        </p>
-        <h1 class="hero-titulo">
-          <span>Días</span>
-          <em class="acento">festivos</em>
-        </h1>
-        <p class="hero-volante">
-          Calendario con puentes, vacaciones óptimas y calculadora de días hábiles.
-        </p>
-      </section>
+      <div id="resultadosBusqueda" class="resultados-busqueda hidden"></div>
 
-      <!-- Banner de instalacion -->
-      <div class="install-banner hidden" id="installBanner">
-        <div class="install-texto">
-          <strong id="installTitulo">Instalar en tu teléfono</strong>
-          <span id="installDesc">Funciona sin conexión, como una app normal.</span>
+      <div id="contenidoPrincipal">
+        <div id="avisosRecordatorio" class="avisos hidden"></div>
+
+        <div class="proximo-dock" id="proximoDock">
+          <div class="proximo-info">
+            <span class="proximo-label">Próximo festivo</span>
+            <span class="proximo-nombre" id="proximoNombre">Cargando</span>
+          </div>
+          <div class="proximo-contador">
+            <span class="contador-numero" id="contadorDias">-</span>
+            <span class="contador-label" id="contadorLabel">días</span>
+          </div>
         </div>
-        <div class="install-acciones">
-          <button id="btnInstalar" class="btn-primario" type="button">Instalar</button>
-          <button id="btnCerrarInstall" class="btn-icono-cerrar" type="button" aria-label="Cerrar">&times;</button>
+
+        <section class="hero">
+          <p class="cintillo">
+            <span class="cursor-punto" aria-hidden="true"></span>
+            <span id="hoyTexto">Hoy</span>
+          </p>
+          <h1 class="hero-titulo">
+            <span>Días</span>
+            <em class="acento">festivos</em>
+          </h1>
+          <p class="hero-volante">
+            Calendario con puentes, vacaciones óptimas y tus propios eventos y recordatorios.
+          </p>
+        </section>
+
+        <div class="install-banner hidden" id="installBanner">
+          <div class="install-texto">
+            <strong id="installTitulo">Instalar en tu teléfono</strong>
+            <span id="installDesc">Funciona sin conexión, como una app normal.</span>
+          </div>
+          <div class="install-acciones">
+            <button id="btnInstalar" class="btn-primario" type="button">Instalar</button>
+            <button id="btnCerrarInstall" class="btn-icono-cerrar" type="button" aria-label="Cerrar">&times;</button>
+          </div>
         </div>
+
+        <section id="vistaCalendario" class="vista" aria-label="Calendario">
+          <header class="vista-encabezado">
+            <span class="vista-numero">01</span>
+            <h2 class="vista-titulo">Calendario del año</h2>
+            <p class="vista-desc">Festivos en azul, tus eventos con su color. Toca cualquier día para verlo o añadir algo.</p>
+          </header>
+          <div class="calendario-controles">
+            <div class="grupo-botones">
+              <button id="btnIrHoy" class="btn-primario" type="button">Ir a hoy</button>
+              <button id="btnExportarAnio" class="btn-secundario" type="button">Exportar año</button>
+              <button id="btnCompartirAnio" class="btn-secundario" type="button">Compartir</button>
+            </div>
+            <span class="resumen-anual" id="resumenAnual"></span>
+          </div>
+          <div id="calendarioGrid" class="calendario-grid"></div>
+        </section>
+
+        <section id="vistaAgenda" class="vista hidden" aria-label="Agenda">
+          <header class="vista-encabezado">
+            <span class="vista-numero">02</span>
+            <h2 class="vista-titulo">Lo que viene</h2>
+            <p class="vista-desc">Festivos y eventos próximos, juntos y en orden.</p>
+          </header>
+          <div class="filtros">
+            <button class="filtro active" type="button" data-agenda="todo">Todo</button>
+            <button class="filtro" type="button" data-agenda="festivos">Solo festivos</button>
+            <button class="filtro" type="button" data-agenda="eventos">Solo eventos</button>
+          </div>
+          <div id="listaAgenda" class="lista-festivos"></div>
+        </section>
+
+        <section id="vistaEventos" class="vista hidden" aria-label="Mis eventos">
+          <header class="vista-encabezado">
+            <span class="vista-numero">03</span>
+            <h2 class="vista-titulo">Mis eventos</h2>
+            <p class="vista-desc">Cumpleaños, pagos, citas y lo que necesites recordar.</p>
+          </header>
+
+          <div id="avisoNotificaciones" class="aviso-permiso hidden">
+            <div class="aviso-texto">
+              <strong>Activar recordatorios</strong>
+              <span>Te avisamos cuando se acerque un evento.</span>
+            </div>
+            <div class="grupo-botones">
+              <button id="btnActivarNotis" class="btn-primario" type="button">Activar</button>
+              <button id="btnOmitirNotis" class="btn-icono-cerrar" type="button" aria-label="Omitir">&times;</button>
+            </div>
+          </div>
+
+          <div class="calendario-controles">
+            <div class="grupo-botones">
+              <button id="btnNuevoEvento" class="btn-primario" type="button">
+                <span aria-hidden="true">+</span> Nuevo evento
+              </button>
+              <button id="btnExportarEventos" class="btn-secundario" type="button">Exportar a calendario</button>
+            </div>
+          </div>
+
+          <div id="listaEventos" class="lista-festivos"></div>
+        </section>
+
+        <section id="vistaPuentes" class="vista hidden" aria-label="Puentes">
+          <header class="vista-encabezado">
+            <span class="vista-numero">04</span>
+            <h2 class="vista-titulo">Puentes del año</h2>
+            <p class="vista-desc">Festivos que caen lunes o viernes y alargan el fin de semana.</p>
+          </header>
+          <div id="listaPuentes" class="lista-festivos"></div>
+        </section>
+
+        <section id="vistaVacaciones" class="vista hidden" aria-label="Vacaciones óptimas">
+          <header class="vista-encabezado">
+            <span class="vista-numero">05</span>
+            <h2 class="vista-titulo">Vacaciones óptimas</h2>
+            <p class="vista-desc">Dónde conviene pedir días para maximizar el descanso.</p>
+          </header>
+          <div id="listaVacaciones" class="lista-vacaciones"></div>
+        </section>
+
+        <section id="vistaHabiles" class="vista hidden" aria-label="Calculadora de días hábiles">
+          <header class="vista-encabezado">
+            <span class="vista-numero">06</span>
+            <h2 class="vista-titulo">Días hábiles</h2>
+            <p class="vista-desc">Cuenta días laborales entre dos fechas, sin fines de semana ni festivos.</p>
+          </header>
+          <div class="calculadora">
+            <div class="campo">
+              <label for="fechaInicio" class="cintillo-mini">Desde</label>
+              <input type="date" id="fechaInicio" class="input-fecha" />
+            </div>
+            <div class="campo">
+              <label for="fechaFin" class="cintillo-mini">Hasta</label>
+              <input type="date" id="fechaFin" class="input-fecha" />
+            </div>
+            <div class="resultado-habiles">
+              <span class="resultado-numero" id="numeroHabiles">-</span>
+              <span class="resultado-label">días hábiles</span>
+              <span class="resultado-detalle" id="detalleHabiles"></span>
+            </div>
+          </div>
+        </section>
+
+        <section id="vistaComparador" class="vista hidden" aria-label="Comparador de países">
+          <header class="vista-encabezado">
+            <span class="vista-numero">07</span>
+            <h2 class="vista-titulo">Comparar países</h2>
+            <p class="vista-desc">Cuántos festivos y puentes tiene cada país este año.</p>
+          </header>
+          <div id="comparadorGrid" class="comparador-grid"></div>
+        </section>
+
+        <section id="vistaAjustes" class="vista hidden" aria-label="Ajustes">
+          <header class="vista-encabezado">
+            <span class="vista-numero">08</span>
+            <h2 class="vista-titulo">Ajustes</h2>
+            <p class="vista-desc">Recordatorios, copia de seguridad y datos de la aplicación.</p>
+          </header>
+
+          <div class="ajuste-bloque">
+            <h3 class="ajuste-titulo">Recordatorios</h3>
+            <p class="ajuste-desc" id="estadoNotificaciones">Comprobando permisos</p>
+            <div class="grupo-botones">
+              <button id="btnPermisoAjustes" class="btn-primario" type="button">Activar notificaciones</button>
+              <button id="btnProbarNoti" class="btn-secundario" type="button">Enviar prueba</button>
+            </div>
+          </div>
+
+          <div class="ajuste-bloque">
+            <h3 class="ajuste-titulo">Copia de seguridad</h3>
+            <p class="ajuste-desc">Guarda tus eventos en un archivo o restaura una copia anterior.</p>
+            <div class="grupo-botones">
+              <button id="btnExportarCopia" class="btn-primario" type="button">Descargar copia</button>
+              <button id="btnImportarCopia" class="btn-secundario" type="button">Restaurar copia</button>
+              <input type="file" id="inputImportar" accept=".json,application/json" class="hidden" />
+            </div>
+          </div>
+
+          <div class="ajuste-bloque">
+            <h3 class="ajuste-titulo">Exportar calendario</h3>
+            <p class="ajuste-desc">Descarga un archivo compatible con Google Calendar, Apple Calendar y Outlook.</p>
+            <div class="grupo-botones">
+              <button id="btnIcsFestivos" class="btn-primario" type="button">Festivos del año</button>
+              <button id="btnIcsEventos" class="btn-secundario" type="button">Mis eventos</button>
+              <button id="btnIcsTodo" class="btn-secundario" type="button">Todo junto</button>
+            </div>
+          </div>
+
+          <div class="ajuste-bloque ajuste-peligro">
+            <h3 class="ajuste-titulo">Borrar datos</h3>
+            <p class="ajuste-desc">Elimina todos tus eventos de este dispositivo. No se puede deshacer.</p>
+            <button id="btnBorrarTodo" class="btn-peligro" type="button">Borrar todos mis eventos</button>
+          </div>
+
+          <div class="ajuste-bloque">
+            <h3 class="ajuste-titulo">Acerca de</h3>
+            <p class="ajuste-desc">
+              Los festivos se calculan con el algoritmo de Pascua y la Ley Emiliani.
+              Todo se guarda solo en tu dispositivo, nada se envía a ningún servidor.
+            </p>
+            <p class="ajuste-desc" id="statsApp"></p>
+          </div>
+        </section>
+
+        <footer class="footer">
+          <div class="footer-firma">
+            <span>Hecho por</span>
+            <a class="firma-nombre" href="https://github.com/siestaa42002-code" target="_blank" rel="noopener">siestaa42002-code</a>
+          </div>
+          <div class="footer-meta">
+            <span id="anioActual"></span>
+            <a href="#" id="linkInstall" class="hidden">Instalar app</a>
+          </div>
+        </footer>
       </div>
-
-      <!-- 01 Calendario -->
-      <section id="vistaCalendario" class="vista" aria-label="Calendario">
-        <header class="vista-encabezado">
-          <span class="vista-numero">01</span>
-          <h2 class="vista-titulo">Calendario del año</h2>
-          <p class="vista-desc">Los festivos aparecen en azul. El día de hoy tiene contorno marcado.</p>
-        </header>
-        <div class="calendario-controles">
-          <button id="btnIrHoy" class="btn-primario" type="button">Ir a hoy</button>
-          <span class="resumen-anual" id="resumenAnual"></span>
-        </div>
-        <div id="calendarioGrid" class="calendario-grid"></div>
-      </section>
-
-      <!-- 02 Lista -->
-      <section id="vistaLista" class="vista hidden" aria-label="Lista de festivos">
-        <header class="vista-encabezado">
-          <span class="vista-numero">02</span>
-          <h2 class="vista-titulo">Todos los festivos</h2>
-          <p class="vista-desc">Lista completa del año con traslados aplicados.</p>
-        </header>
-        <div class="filtros">
-          <button class="filtro active" type="button" data-filtro="todos">Todos</button>
-          <button class="filtro" type="button" data-filtro="proximos">Próximos</button>
-          <button class="filtro" type="button" data-filtro="trasladados">Trasladados</button>
-        </div>
-        <div id="listaFestivos" class="lista-festivos"></div>
-      </section>
-
-      <!-- 03 Puentes -->
-      <section id="vistaPuentes" class="vista hidden" aria-label="Puentes">
-        <header class="vista-encabezado">
-          <span class="vista-numero">03</span>
-          <h2 class="vista-titulo">Puentes del año</h2>
-          <p class="vista-desc">Festivos que caen lunes o viernes y alargan el fin de semana.</p>
-        </header>
-        <div id="listaPuentes" class="lista-festivos"></div>
-      </section>
-
-      <!-- 04 Vacaciones -->
-      <section id="vistaVacaciones" class="vista hidden" aria-label="Vacaciones óptimas">
-        <header class="vista-encabezado">
-          <span class="vista-numero">04</span>
-          <h2 class="vista-titulo">Vacaciones óptimas</h2>
-          <p class="vista-desc">Dónde conviene pedir días para maximizar el descanso.</p>
-        </header>
-        <div id="listaVacaciones" class="lista-vacaciones"></div>
-      </section>
-
-      <!-- 05 Habiles -->
-      <section id="vistaHabiles" class="vista hidden" aria-label="Calculadora de días hábiles">
-        <header class="vista-encabezado">
-          <span class="vista-numero">05</span>
-          <h2 class="vista-titulo">Días hábiles</h2>
-          <p class="vista-desc">Cuenta días laborales entre dos fechas, sin fines de semana ni festivos.</p>
-        </header>
-        <div class="calculadora">
-          <div class="campo">
-            <label for="fechaInicio" class="cintillo-mini">Desde</label>
-            <input type="date" id="fechaInicio" class="input-fecha" />
-          </div>
-          <div class="campo">
-            <label for="fechaFin" class="cintillo-mini">Hasta</label>
-            <input type="date" id="fechaFin" class="input-fecha" />
-          </div>
-          <div class="resultado-habiles">
-            <span class="resultado-numero" id="numeroHabiles">-</span>
-            <span class="resultado-label">días hábiles</span>
-            <span class="resultado-detalle" id="detalleHabiles"></span>
-          </div>
-        </div>
-      </section>
-
-      <!-- 06 Comparador -->
-      <section id="vistaComparador" class="vista hidden" aria-label="Comparador de países">
-        <header class="vista-encabezado">
-          <span class="vista-numero">06</span>
-          <h2 class="vista-titulo">Comparar países</h2>
-          <p class="vista-desc">Cuántos festivos y puentes tiene cada país este año.</p>
-        </header>
-        <div id="comparadorGrid" class="comparador-grid"></div>
-      </section>
-
-      <footer class="footer">
-        <div class="footer-firma">
-          <span>Hecho por</span>
-          <a class="firma-nombre" href="https://github.com/siestaa42002-code" target="_blank" rel="noopener">siestaa42002-code</a>
-        </div>
-        <div class="footer-meta">
-          <span id="anioActual"></span>
-          <a href="#" id="linkInstall" class="hidden">Instalar app</a>
-        </div>
-      </footer>
     </main>
+  </div>
+
+  <div id="modalEvento" class="modal-fondo hidden" role="dialog" aria-modal="true" aria-labelledby="modalTitulo">
+    <div class="modal">
+      <div class="modal-cabecera">
+        <h2 class="modal-titulo" id="modalTitulo">Nuevo evento</h2>
+        <button id="btnCerrarModal" class="btn-icono-cerrar" type="button" aria-label="Cerrar">&times;</button>
+      </div>
+
+      <div class="modal-cuerpo">
+        <div class="campo">
+          <label for="eventoTitulo" class="cintillo-mini">Título</label>
+          <input type="text" id="eventoTitulo" class="input-texto" maxlength="80" placeholder="Cumpleaños de mamá" />
+        </div>
+
+        <div class="campo">
+          <label for="eventoFecha" class="cintillo-mini">Fecha</label>
+          <input type="date" id="eventoFecha" class="input-fecha" />
+        </div>
+
+        <div class="campo">
+          <span class="cintillo-mini">Categoría</span>
+          <div id="selectorCategoria" class="selector-categoria"></div>
+        </div>
+
+        <div class="campo">
+          <label for="eventoRecordar" class="cintillo-mini">Recordatorio</label>
+          <select id="eventoRecordar" class="input-texto"></select>
+        </div>
+
+        <label class="campo-check">
+          <input type="checkbox" id="eventoAnual" />
+          <span>Se repite cada año</span>
+        </label>
+
+        <div class="campo">
+          <label for="eventoNota" class="cintillo-mini">Nota (opcional)</label>
+          <textarea id="eventoNota" class="input-texto" rows="3" maxlength="300" placeholder="Detalles, lugar, lo que quieras"></textarea>
+        </div>
+      </div>
+
+      <div class="modal-pie">
+        <button id="btnBorrarEvento" class="btn-peligro hidden" type="button">Borrar</button>
+        <div class="modal-pie-derecha">
+          <button id="btnCancelarEvento" class="btn-secundario" type="button">Cancelar</button>
+          <button id="btnGuardarEvento" class="btn-primario" type="button">Guardar</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div id="modalDia" class="modal-fondo hidden" role="dialog" aria-modal="true" aria-labelledby="modalDiaTitulo">
+    <div class="modal modal-pequeno">
+      <div class="modal-cabecera">
+        <h2 class="modal-titulo" id="modalDiaTitulo">Día</h2>
+        <button id="btnCerrarModalDia" class="btn-icono-cerrar" type="button" aria-label="Cerrar">&times;</button>
+      </div>
+      <div class="modal-cuerpo" id="modalDiaCuerpo"></div>
+      <div class="modal-pie">
+        <div class="modal-pie-derecha">
+          <button id="btnAnadirEnDia" class="btn-primario" type="button">Añadir evento</button>
+        </div>
+      </div>
+    </div>
   </div>
 
   <div id="toast" class="toast" role="status" aria-live="polite"></div>
 
   <script src="festivos-data.js"></script>
+  <script src="eventos.js"></script>
   <script src="script.js"></script>
 </body>
 </html>

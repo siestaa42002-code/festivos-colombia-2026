@@ -1,10 +1,11 @@
-const CACHE_NAME = "festivos-v6";
+const CACHE_NAME = "festivos-v7";
 const ARCHIVOS = [
   "./",
   "./index.html",
   "./styles.css",
   "./script.js",
   "./festivos-data.js",
+  "./eventos.js",
   "./manifest.json",
   "./favicon.svg",
   "./icon-192.png",
