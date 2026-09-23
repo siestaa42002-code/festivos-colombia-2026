@@ -1,12 +1,3 @@
-[build]
-  publish = "."
-  functions = "netlify/functions"
-
-[[redirects]]
-  from = "/api/festivos"
-  to = "/.netlify/functions/festivos"
-  status = 200
-
 [[headers]]
   for = "/*"
   [headers.values]
@@ -17,9 +8,4 @@
 [[headers]]
   for = "/sw.js"
   [headers.values]
-    Cache-Control = "no-cache"
-
-[[headers]]
-  for = "/api/*"
-  [headers.values]
-    Access-Control-Allow-Origin = "*"
+    Cache-Control = "public, max-age=0, must-revalidate"
