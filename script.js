@@ -1,5 +1,5 @@
 /*
-  Festivos - Calendario de dias festivos
+  Festivos - Calendario de días festivos
   Autor: siestaa42002-code
   https://github.com/siestaa42002-code/festivos-colombia-2026
   Licencia: MIT
@@ -40,7 +40,7 @@
     try {
       localStorage.setItem(clave, valor);
     } catch (e) {
-      // Modo privado o storage lleno: seguimos sin persistir
+      // Modo privado o almacenamiento lleno: seguimos sin persistir
     }
   }
 
@@ -93,7 +93,7 @@
   }
 
   // =========================================================================
-  // Proximo festivo
+  // Próximo festivo
   // =========================================================================
 
   function actualizarProximoFestivo() {
@@ -112,7 +112,7 @@
 
     setTexto("proximoNombre", proximo.nombre);
     setTexto("contadorDias", dias === 0 ? "Hoy" : String(dias));
-    setTexto("contadorLabel", dias === 0 ? "es festivo" : dias === 1 ? "dia" : "dias");
+    setTexto("contadorLabel", dias === 0 ? "es festivo" : dias === 1 ? "día" : "días");
   }
 
   function actualizarHoyTexto() {
@@ -365,7 +365,7 @@
     var puentes = detectarPuentes(estado.festivos);
 
     if (puentes.length === 0) {
-      contenedor.appendChild(mensajeVacio("No hay puentes este anio."));
+      contenedor.appendChild(mensajeVacio("No hay puentes este año."));
       return;
     }
 
@@ -386,7 +386,7 @@
     var sugerencias = sugerirVacaciones(estado.festivos, estado.anio, 4);
 
     if (sugerencias.length === 0) {
-      contenedor.appendChild(mensajeVacio("No se encontraron ventanas especialmente convenientes este anio."));
+      contenedor.appendChild(mensajeVacio("No se encontraron ventanas especialmente convenientes este año."));
       return;
     }
 
@@ -411,8 +411,8 @@
 
       var detalle = document.createElement("p");
       detalle.className = "vacacion-detalle";
-      detalle.textContent = "Pide " + s.diasPedidos + (s.diasPedidos === 1 ? " dia" : " dias") +
-        " y descansas " + s.diasLibres + " seguidos.";
+      detalle.textContent = "Pide " + s.diasPedidos + (s.diasPedidos === 1 ? " día" : " días") +
+        " y descansas " + s.diasLibres + " días seguidos.";
       card.appendChild(detalle);
 
       var rango = document.createElement("p");
@@ -429,7 +429,7 @@
   }
 
   // =========================================================================
-  // Vista 05: Dias habiles
+  // Vista 05: Días hábiles
   // =========================================================================
 
   function inicializarCalculadora() {
@@ -461,7 +461,7 @@
 
       if (anioFin - anioInicio > 20) {
         setTexto("numeroHabiles", "-");
-        setTexto("detalleHabiles", "El rango es demasiado amplio. Usa menos de 20 anios.");
+        setTexto("detalleHabiles", "El rango es demasiado amplio. Usa menos de 20 años.");
         return;
       }
 
@@ -478,7 +478,7 @@
 
       setTexto("numeroHabiles", String(habiles));
       setTexto("detalleHabiles",
-        totalDias + " dias naturales y " + festivosEnRango.length +
+        totalDias + " días naturales y " + festivosEnRango.length +
         (festivosEnRango.length === 1 ? " festivo entre semana" : " festivos entre semana"));
     }
 
@@ -524,7 +524,7 @@
 
       var detalle = document.createElement("p");
       detalle.className = "pais-puentes";
-      detalle.textContent = puentes.length + (puentes.length === 1 ? " puente" : " puentes") + " en el anio";
+      detalle.textContent = puentes.length + (puentes.length === 1 ? " puente" : " puentes") + " en el año";
       card.appendChild(detalle);
 
       contenedor.appendChild(card);
@@ -532,7 +532,7 @@
   }
 
   // =========================================================================
-  // Navegacion
+  // Navegación
   // =========================================================================
 
   var MAPA_VISTAS = {
@@ -585,7 +585,7 @@
   }
 
   // =========================================================================
-  // Dropdown de anio
+  // Dropdown de año
   // =========================================================================
 
   function construirDropdownAnio() {
@@ -667,7 +667,7 @@
   }
 
   // =========================================================================
-  // PWA e instalacion
+  // PWA e instalación
   // =========================================================================
 
   var promptInstalacion = null;
@@ -718,10 +718,10 @@
 
     // iOS no dispara beforeinstallprompt: mostramos instrucciones
     if (esIOS() && !esStandalone()) {
-      setTexto("installTitulo", "Anadir a la pantalla de inicio");
-      setTexto("installDesc", "Toca el boton Compartir y luego Anadir a inicio.");
+      setTexto("installTitulo", "Añadir a la pantalla de inicio");
+      setTexto("installDesc", "Toca el botón Compartir y luego Añadir a inicio.");
       var btn = $("btnInstalar");
-      if (btn) btn.textContent = "Como hacerlo";
+      if (btn) btn.textContent = "Cómo hacerlo";
       mostrarBannerInstalacion();
     }
 
@@ -738,12 +738,12 @@
 
   function instalarApp() {
     if (esIOS()) {
-      mostrarToast("En iPhone: boton Compartir y luego Anadir a pantalla de inicio.", 5000);
+      mostrarToast("En iPhone: toca Compartir y luego Añadir a pantalla de inicio.", 5000);
       return;
     }
 
     if (!promptInstalacion) {
-      mostrarToast("Usa el menu del navegador y elige Instalar aplicacion.", 4500);
+      mostrarToast("Usa el menú del navegador y elige Instalar aplicación.", 4500);
       return;
     }
 
@@ -784,7 +784,7 @@
         recargarFestivos();
         renderCalendario();
         renderVistaActual();
-        anunciar("Anio cambiado a " + estado.anio);
+        anunciar("Año cambiado a " + estado.anio);
       });
 
       onClick("btnTema", function () {
@@ -815,7 +815,7 @@
       console.log("%chttps://github.com/siestaa42002-code/festivos-colombia-2026", "font-size: 12px; color: #999;");
     } catch (err) {
       console.error("Error al iniciar Festivos:", err);
-      mostrarToast("Hubo un error al cargar. Recarga la pagina.", 5000);
+      mostrarToast("Hubo un error al cargar. Recarga la página.", 5000);
     }
   }
 

@@ -1,34 +1,34 @@
 # Festivos
 
-Calendario interactivo de dias festivos. Instalable como app en el telefono.
+Calendario interactivo de días festivos. Instalable como app en el teléfono.
 
 ## Modos
 
-1. **Calendario** — vista anual de 12 meses. Al abrir se situa automaticamente en el mes actual, con el dia de hoy marcado.
-2. **Lista** — todos los festivos del anio con filtros (todos, proximos, trasladados).
+1. **Calendario** — vista anual de 12 meses. Al abrir se sitúa automáticamente en el mes actual, con el día de hoy marcado.
+2. **Lista** — todos los festivos del año con filtros (todos, próximos, trasladados).
 3. **Puentes** — festivos que caen lunes o viernes.
-4. **Vacaciones** — sugiere donde pedir dias para maximizar el descanso, ordenado por rendimiento.
-5. **Dias habiles** — cuenta dias laborales entre dos fechas descontando festivos y fines de semana.
-6. **Comparar** — festivos y puentes en Colombia, Mexico, Espana, Peru y Ecuador.
+4. **Vacaciones** — sugiere dónde pedir días para maximizar el descanso, ordenado por rendimiento.
+5. **Días hábiles** — cuenta días laborales entre dos fechas descontando festivos y fines de semana.
+6. **Comparar** — festivos y puentes en Colombia, México, España, Perú y Ecuador.
 
-## Caracteristicas
+## Características
 
-- Calculo algoritmico de Pascua (Meeus/Jones/Butcher) para festivos moviles.
-- Ley Emiliani aplicada correctamente (traslado al lunes siguiente).
-- Zona horaria fija en Bogota (UTC-5) sin importar donde este el dispositivo.
-- Anios 2024 a 2030.
+- Cálculo algorítmico de Pascua (Meeus/Jones/Butcher) para los festivos móviles.
+- Ley Emiliani aplicada correctamente: traslado al lunes siguiente cuando corresponde.
+- Zona horaria fija en Bogotá (UTC-5), sin importar dónde esté el dispositivo.
+- Años 2024 a 2030.
 - Modo claro y oscuro.
-- PWA instalable en Android e iOS, funciona sin conexion.
+- PWA instalable en Android e iOS, funciona sin conexión.
 
-## Instalar en el telefono
+## Instalar en el teléfono
 
-**Android (Chrome):** abre el sitio y toca el boton Instalar del banner, o usa el menu de tres puntos y elige "Instalar aplicacion".
+**Android (Chrome):** abre el sitio y toca el botón Instalar del banner, o usa el menú de tres puntos y elige "Instalar aplicación".
 
-**iPhone (Safari):** toca el boton Compartir y luego "Anadir a pantalla de inicio".
+**iPhone (Safari):** toca el botón Compartir y luego "Añadir a pantalla de inicio".
 
 ## Stack
 
-HTML, CSS y JavaScript puro. Sin frameworks ni dependencias. Tipografia Geist.
+HTML, CSS y JavaScript puro. Sin frameworks ni dependencias. Tipografía Geist.
 
 ## Licencia
 

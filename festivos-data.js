@@ -1,12 +1,12 @@
 /*
-  Festivos - Calendario de dias festivos
+  Festivos - Calendario de días festivos
   Autor: siestaa42002-code
   https://github.com/siestaa42002-code/festivos-colombia-2026
   Licencia: MIT
 */
 
 // ===========================================================================
-// Calculo de Pascua (Meeus/Jones/Butcher, calendario gregoriano)
+// Cálculo de Pascua (Meeus/Jones/Butcher, calendario gregoriano)
 // ===========================================================================
 
 function calcularPascua(anio) {
@@ -56,7 +56,7 @@ function claveFecha(fecha) {
 }
 
 function hoyEnBogota() {
-  // La fecha de hoy segun Bogota (UTC-5), sin importar donde este el dispositivo
+  // La fecha de hoy según Bogotá (UTC-5), sin importar dónde esté el dispositivo
   const ahora = new Date();
   const utcMs = ahora.getTime() + ahora.getTimezoneOffset() * 60000;
   const bogota = new Date(utcMs - 5 * 3600000);
@@ -72,7 +72,7 @@ const MESES = [
   "julio", "agosto", "septiembre", "octubre", "noviembre", "diciembre"
 ];
 
-const DIAS_SEMANA = ["domingo", "lunes", "martes", "miercoles", "jueves", "viernes", "sabado"];
+const DIAS_SEMANA = ["domingo", "lunes", "martes", "miércoles", "jueves", "viernes", "sábado"];
 const DIAS_SEMANA_CORTO = ["D", "L", "M", "M", "J", "V", "S"];
 
 function formatearFechaLarga(fecha) {
@@ -93,11 +93,11 @@ function festivosColombia(anio) {
 
   // Fijos: no se trasladan
   const fijos = [
-    { mes: 1, dia: 1, nombre: "Ano Nuevo" },
-    { mes: 5, dia: 1, nombre: "Dia del Trabajo" },
-    { mes: 7, dia: 20, nombre: "Dia de la Independencia" },
-    { mes: 8, dia: 7, nombre: "Batalla de Boyaca" },
-    { mes: 12, dia: 8, nombre: "Inmaculada Concepcion" },
+    { mes: 1, dia: 1, nombre: "Año Nuevo" },
+    { mes: 5, dia: 1, nombre: "Día del Trabajo" },
+    { mes: 7, dia: 20, nombre: "Día de la Independencia" },
+    { mes: 8, dia: 7, nombre: "Batalla de Boyacá" },
+    { mes: 12, dia: 8, nombre: "Inmaculada Concepción" },
     { mes: 12, dia: 25, nombre: "Navidad" }
   ];
 
@@ -112,12 +112,12 @@ function festivosColombia(anio) {
 
   // Trasladables al lunes siguiente (Ley Emiliani)
   const trasladables = [
-    { mes: 1, dia: 6, nombre: "Dia de los Reyes Magos" },
-    { mes: 3, dia: 19, nombre: "Dia de San Jose" },
+    { mes: 1, dia: 6, nombre: "Día de los Reyes Magos" },
+    { mes: 3, dia: 19, nombre: "Día de San José" },
     { mes: 6, dia: 29, nombre: "San Pedro y San Pablo" },
-    { mes: 8, dia: 15, nombre: "Asuncion de la Virgen" },
-    { mes: 10, dia: 12, nombre: "Dia de la Raza" },
-    { mes: 11, dia: 1, nombre: "Dia de Todos los Santos" },
+    { mes: 8, dia: 15, nombre: "Asunción de la Virgen" },
+    { mes: 10, dia: 12, nombre: "Día de la Raza" },
+    { mes: 11, dia: 1, nombre: "Día de Todos los Santos" },
     { mes: 11, dia: 11, nombre: "Independencia de Cartagena" }
   ];
 
@@ -133,7 +133,7 @@ function festivosColombia(anio) {
     });
   });
 
-  // Moviles ligados a Pascua, no se trasladan
+  // Móviles ligados a Pascua, no se trasladan
   lista.push({
     fecha: sumarDias(domingoPascua, -3),
     nombre: "Jueves Santo",
@@ -147,10 +147,10 @@ function festivosColombia(anio) {
     trasladado: false
   });
 
-  // Moviles ligados a Pascua que si se trasladan al lunes
+  // Móviles ligados a Pascua que sí se trasladan al lunes
   lista.push({
     fecha: sumarDias(domingoPascua, 43),
-    nombre: "Ascension del Senor",
+    nombre: "Ascensión del Señor",
     tipo: "movil",
     trasladado: true,
     fechaOriginal: sumarDias(domingoPascua, 39)
@@ -164,7 +164,7 @@ function festivosColombia(anio) {
   });
   lista.push({
     fecha: sumarDias(domingoPascua, 71),
-    nombre: "Sagrado Corazon de Jesus",
+    nombre: "Sagrado Corazón de Jesús",
     tipo: "movil",
     trasladado: true,
     fechaOriginal: sumarDias(domingoPascua, 68)
@@ -175,7 +175,7 @@ function festivosColombia(anio) {
 }
 
 // ===========================================================================
-// Otros paises (comparador)
+// Otros países (comparador)
 // ===========================================================================
 
 function mapaFijos(anio, arr) {
@@ -191,12 +191,12 @@ function mapaFijos(anio, arr) {
 
 function festivosMexico(anio) {
   return mapaFijos(anio, [
-    { mes: 1, dia: 1, nombre: "Ano Nuevo" },
-    { mes: 2, dia: 5, nombre: "Dia de la Constitucion" },
-    { mes: 3, dia: 21, nombre: "Natalicio de Benito Juarez" },
-    { mes: 5, dia: 1, nombre: "Dia del Trabajo" },
-    { mes: 9, dia: 16, nombre: "Dia de la Independencia" },
-    { mes: 11, dia: 20, nombre: "Revolucion Mexicana" },
+    { mes: 1, dia: 1, nombre: "Año Nuevo" },
+    { mes: 2, dia: 5, nombre: "Día de la Constitución" },
+    { mes: 3, dia: 21, nombre: "Natalicio de Benito Juárez" },
+    { mes: 5, dia: 1, nombre: "Día del Trabajo" },
+    { mes: 9, dia: 16, nombre: "Día de la Independencia" },
+    { mes: 11, dia: 20, nombre: "Revolución Mexicana" },
     { mes: 12, dia: 25, nombre: "Navidad" }
   ]).sort(function (a, b) { return a.fecha - b.fecha; });
 }
@@ -205,14 +205,14 @@ function festivosEspana(anio) {
   const pascua = calcularPascua(anio);
   const dp = crearFecha(anio, pascua.mes, pascua.dia);
   const lista = mapaFijos(anio, [
-    { mes: 1, dia: 1, nombre: "Ano Nuevo" },
-    { mes: 1, dia: 6, nombre: "Epifania del Senor" },
+    { mes: 1, dia: 1, nombre: "Año Nuevo" },
+    { mes: 1, dia: 6, nombre: "Epifanía del Señor" },
     { mes: 5, dia: 1, nombre: "Fiesta del Trabajo" },
-    { mes: 8, dia: 15, nombre: "Asuncion de la Virgen" },
+    { mes: 8, dia: 15, nombre: "Asunción de la Virgen" },
     { mes: 10, dia: 12, nombre: "Fiesta Nacional" },
     { mes: 11, dia: 1, nombre: "Todos los Santos" },
-    { mes: 12, dia: 6, nombre: "Dia de la Constitucion" },
-    { mes: 12, dia: 8, nombre: "Inmaculada Concepcion" },
+    { mes: 12, dia: 6, nombre: "Día de la Constitución" },
+    { mes: 12, dia: 8, nombre: "Inmaculada Concepción" },
     { mes: 12, dia: 25, nombre: "Navidad" }
   ]);
   lista.push({ fecha: sumarDias(dp, -2), nombre: "Viernes Santo", tipo: "movil", trasladado: false });
@@ -223,15 +223,15 @@ function festivosPeru(anio) {
   const pascua = calcularPascua(anio);
   const dp = crearFecha(anio, pascua.mes, pascua.dia);
   const lista = mapaFijos(anio, [
-    { mes: 1, dia: 1, nombre: "Ano Nuevo" },
-    { mes: 5, dia: 1, nombre: "Dia del Trabajo" },
+    { mes: 1, dia: 1, nombre: "Año Nuevo" },
+    { mes: 5, dia: 1, nombre: "Día del Trabajo" },
     { mes: 6, dia: 29, nombre: "San Pedro y San Pablo" },
     { mes: 7, dia: 28, nombre: "Fiestas Patrias" },
     { mes: 7, dia: 29, nombre: "Fiestas Patrias" },
     { mes: 8, dia: 30, nombre: "Santa Rosa de Lima" },
     { mes: 10, dia: 8, nombre: "Combate de Angamos" },
     { mes: 11, dia: 1, nombre: "Todos los Santos" },
-    { mes: 12, dia: 8, nombre: "Inmaculada Concepcion" },
+    { mes: 12, dia: 8, nombre: "Inmaculada Concepción" },
     { mes: 12, dia: 25, nombre: "Navidad" }
   ]);
   lista.push({ fecha: sumarDias(dp, -3), nombre: "Jueves Santo", tipo: "movil", trasladado: false });
@@ -243,12 +243,12 @@ function festivosEcuador(anio) {
   const pascua = calcularPascua(anio);
   const dp = crearFecha(anio, pascua.mes, pascua.dia);
   const lista = mapaFijos(anio, [
-    { mes: 1, dia: 1, nombre: "Ano Nuevo" },
-    { mes: 5, dia: 1, nombre: "Dia del Trabajo" },
+    { mes: 1, dia: 1, nombre: "Año Nuevo" },
+    { mes: 5, dia: 1, nombre: "Día del Trabajo" },
     { mes: 5, dia: 24, nombre: "Batalla de Pichincha" },
     { mes: 8, dia: 10, nombre: "Primer Grito de Independencia" },
     { mes: 10, dia: 9, nombre: "Independencia de Guayaquil" },
-    { mes: 11, dia: 2, nombre: "Dia de los Difuntos" },
+    { mes: 11, dia: 2, nombre: "Día de los Difuntos" },
     { mes: 11, dia: 3, nombre: "Independencia de Cuenca" },
     { mes: 12, dia: 25, nombre: "Navidad" }
   ]);
@@ -260,9 +260,9 @@ function festivosEcuador(anio) {
 
 const PAISES = {
   co: { nombre: "Colombia", fn: festivosColombia },
-  mx: { nombre: "Mexico", fn: festivosMexico },
-  es: { nombre: "Espana", fn: festivosEspana },
-  pe: { nombre: "Peru", fn: festivosPeru },
+  mx: { nombre: "México", fn: festivosMexico },
+  es: { nombre: "España", fn: festivosEspana },
+  pe: { nombre: "Perú", fn: festivosPeru },
   ec: { nombre: "Ecuador", fn: festivosEcuador }
 };
 
@@ -272,7 +272,7 @@ function obtenerFestivos(pais, anio) {
 }
 
 // ===========================================================================
-// Utilidades de calculo
+// Utilidades de cálculo
 // ===========================================================================
 
 function esFinDeSemana(fecha) {
@@ -307,9 +307,9 @@ function esDiaLibre(fecha, claves) {
 }
 
 /*
-  Busca ventanas donde pedir pocos dias de vacaciones genera muchos dias
+  Busca ventanas donde pedir pocos días de vacaciones genera muchos días
   libres seguidos. Para cada festivo entre semana, prueba tomar de 1 a
-  maxDias habiles inmediatamente antes o despues y mide el bloque libre
+  maxDias hábiles inmediatamente antes o después y mide el bloque libre
   resultante.
 */
 function sugerirVacaciones(festivos, anio, maxDias) {
@@ -329,7 +329,7 @@ function sugerirVacaciones(festivos, anio, maxDias) {
         let cursor = festivo.fecha;
         let intentos = 0;
 
-        // Reunir n dias habiles consecutivos en la direccion indicada
+        // Reunir n días hábiles consecutivos en la dirección indicada
         while (pedidos.length < n && intentos < 30) {
           cursor = sumarDias(cursor, direccion === "despues" ? 1 : -1);
           intentos++;
@@ -374,7 +374,7 @@ function sugerirVacaciones(festivos, anio, maxDias) {
     });
   });
 
-  // Quedarse con la mejor opcion por festivo
+  // Quedarse con la mejor opción por festivo
   const mejores = {};
   candidatos.forEach(function (c) {
     const key = c.festivo + "|" + claveFecha(c.fechaFestivo);
@@ -394,8 +394,8 @@ function sugerirVacaciones(festivos, anio, maxDias) {
 }
 
 // ===========================================================================
-// Exportacion explicita al ambito global
-// Garantiza que script.js encuentre todo, sin importar como se cargue
+// Exportación explícita al ámbito global
+// Garantiza que script.js encuentre todo, sin importar cómo se cargue
 // ===========================================================================
 
 (function (global) {
